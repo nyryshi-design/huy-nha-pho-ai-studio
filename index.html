@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#101a2b">
-<title>Huy Nhà Phố AI Studio – V1.6</title>
+<title>Huy Nhà Phố AI Studio – V1.6.1</title>
 <style>
 :root{--bg:#0b1220;--panel:#121e30;--panel2:#17263b;--line:#263851;--text:#f4f7fb;--muted:#a9b7c9;--gold:#e6bd76;--green:#67d4a0;--blue:#7db7f4}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#0b1220,#111d30 55%,#0c1728);color:var(--text);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:40px}
@@ -34,7 +34,7 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.6</div></div>
+  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.6.1</div></div>
   <section class="hero">
     <h1>Mỗi căn nhà,<br>một câu chuyện riêng.</h1>
     <p>Tải video thực tế, nhập thông tin căn nhà và tạo phương án dựng 30–45 giây. Anh luôn là người duyệt cuối cùng.</p>
@@ -86,7 +86,7 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
   <section class="card" id="mediaLibrary">
     <div class="step"><span class="num">M</span><div><h2>Kho tư liệu căn nhà</h2><div class="small">Gom video dài, clip ngắn, ảnh và file lồng tiếng vào cùng một dự án. Tệp được giữ nguyên, không tự ghép hay chỉnh sửa.</div></div></div>
     <label>Thêm tư liệu (có thể chọn nhiều tệp)</label>
-    <input id="mediaFiles" type="file" accept="video/*,audio/*,image/*" multiple>
+    <input id="mediaFiles" type="file" accept="*/*" multiple>
     <div class="grid" style="margin-top:12px">
       <div class="notice"><b id="mediaVideoCount">0</b><br>Video</div>
       <div class="notice"><b id="mediaAudioCount">0</b><br>Âm thanh / lồng tiếng</div>
@@ -95,7 +95,7 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
     </div>
     <div id="mediaList" class="filelist"></div>
     <div id="mediaStatus" class="status">Chưa có tư liệu bổ sung.</div>
-    <div class="notice warn">Lưu ý: V1.6 hiện là kho tư liệu cục bộ và bước chuẩn bị dữ liệu. Ứng dụng chưa tự hiểu nội dung hình/tiếng, chưa tự tìm tiện ích, tạo bản đồ động hoặc xuất MP4. Tệp lớn có thể vượt giới hạn bộ nhớ iPhone. Hãy giữ bản gốc trong Ảnh/Tệp và thêm từng đợt nếu cần.</div>
+    <div class="notice warn">Lưu ý: V1.6.1 hiện là kho tư liệu cục bộ và bước chuẩn bị dữ liệu. Ứng dụng chưa tự hiểu nội dung hình/tiếng, chưa tự tìm tiện ích, tạo bản đồ động hoặc xuất MP4. Tệp lớn có thể vượt giới hạn bộ nhớ iPhone. Hãy giữ bản gốc trong Ảnh/Tệp và thêm từng đợt nếu cần.</div>
   </section>
 
   <section class="card">
@@ -295,9 +295,10 @@ $("videos").addEventListener("change",()=>{
 
 function mediaKind(file){
  const t=(file.type||"").toLowerCase();
- if(t.startsWith("video/"))return "Video";
- if(t.startsWith("audio/"))return "Âm thanh";
- if(t.startsWith("image/"))return "Hình ảnh";
+ const n=(file.name||"").toLowerCase();
+ if(t.startsWith("video/")||/\\.(mp4|mov|m4v|avi|mkv|3gp|webm)$/.test(n))return "Video";
+ if(t.startsWith("audio/")||/\\.(m4a|mp3|wav|aac|caf|aiff|aif|flac|ogg|opus)$/.test(n))return "Âm thanh";
+ if(t.startsWith("image/")||/\\.(jpg|jpeg|png|heic|heif|webp|gif|bmp|tif|tiff)$/.test(n))return "Hình ảnh";
  return "Tệp khác";
 }
 function renderMediaAssets(){
