@@ -238,22 +238,22 @@ $("approve").addEventListener("click",()=>{
 
 function classifySpeechLine(line){
  const t=line.toLowerCase();
- if(/aeon|mall|siêu thị|chợ|trường|bệnh viện|công viên|nguyễn|lũy bán|đường|kết nối|di chuyển|vị trí|gần/.test(t))
-   return {kind:"Vị trí – bản đồ",scene:"Bản đồ khu vực 2D/3D/vệ tinh; chỉ hiển thị tiện ích và tuyến đã xác minh.",map:true};
- if(/phòng ngủ|pn\b|wc|nhà vệ sinh|toilet/.test(t))
+ if(/phòng ngủ|\bpn\b|wc|nhà vệ sinh|toilet/.test(t))
    return {kind:"Phòng ngủ / WC",scene:"Chọn cảnh phòng ngủ hoặc WC tương ứng; không dùng cảnh khác để minh họa sai công năng.",map:false};
  if(/bếp|nấu ăn|ăn uống/.test(t))
    return {kind:"Khu bếp",scene:"Chọn cảnh bếp và khu vực ăn uống nếu có trong video.",map:false};
- if(/phòng khách|sinh hoạt|gia đình|không gian chung/.test(t))
-   return {kind:"Không gian sinh hoạt",scene:"Chọn cảnh phòng khách hoặc không gian chung để khách hình dung sinh hoạt.",map:false};
+ if(/phòng khách|sinh hoạt|gia đình|không gian chung|cầu thang/.test(t))
+   return {kind:"Không gian sinh hoạt",scene:"Chọn cảnh phòng khách, cầu thang hoặc không gian chung phù hợp với lời thoại.",map:false};
  if(/hẻm|xe hơi|ô tô|đường vào|lối vào/.test(t))
    return {kind:"Lối vào / hẻm",scene:"Chọn cảnh đường hẻm, lối tiếp cận hoặc mặt tiền; tránh khẳng định kích thước nếu chưa xác minh.",map:false};
- if(/mặt tiền|nhà nằm|căn nhà|nhà phố|giá|diện tích|tầng|kết cấu/.test(t))
-   return {kind:"Giới thiệu căn nhà",scene:"Ưu tiên cảnh mặt tiền hoặc cảnh anh nói trực tiếp trước camera.",map:false};
+ if(/aeon|mall|siêu thị|chợ|trường|bệnh viện|công viên|nguyễn|lũy bán|kết nối|di chuyển|vị trí|gần|trục đường|đường lớn/.test(t))
+   return {kind:"Vị trí – bản đồ",scene:"Đề xuất bản đồ khu vực 2D/3D/vệ tinh; chỉ hiển thị tiện ích và tuyến đường đã xác minh.",map:true};
+ if(/khu dân cư|căn nhà|nhà phố|mặt tiền|giá|diện tích|tầng|kết cấu/.test(t))
+   return {kind:"Giới thiệu căn nhà",scene:"Ưu tiên cảnh mặt tiền, toàn cảnh căn nhà hoặc cảnh anh nói trực tiếp trước camera.",map:false};
  return {kind:"Nội dung cần đối chiếu",scene:"Anh chọn cảnh phù hợp sau khi xem video; Studio chưa tự suy đoán cảnh.",map:false};
 }
 $("analyzeSpeech").addEventListener("click",()=>{
- const lines=$("transcript").value.split(/\\n+/).map(x=>x.trim()).filter(Boolean);
+ const lines=$("transcript").value.split(/[\r\n]+/).map(x=>x.trim()).filter(Boolean);
  const start=Math.max(0,Number($("speechStart").value)||0);
  const end=Math.max(start+1,Number($("speechEnd").value)||45);
  if(!lines.length){$("speechTimeline").innerHTML='<div class="notice warn">Anh nhập lời thoại trước nhé.</div>';$("speechResults").classList.remove("hidden");return;}
