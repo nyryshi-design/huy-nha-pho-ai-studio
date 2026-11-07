@@ -82,6 +82,15 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
     </div>
     <label>Ưu tiên nội dung</label>
     <select id="priority"><option>Ưu tiên hình ảnh căn nhà</option><option>Ưu tiên vị trí và tiện ích</option><option>Cân bằng nhà và vị trí</option><option>Ưu tiên câu chuyện mua ở thực</option></select>
+    <label>Phong cách bản đồ động</label>
+    <select id="mapStyle">
+      <option value="auto">AI tự kết hợp 2D, 3D và vệ tinh tùy căn nhà</option>
+      <option value="2d">Bản đồ 2D – đường kết nối, tuyến di chuyển</option>
+      <option value="3d">Bản đồ 3D – không gian đô thị</option>
+      <option value="satellite">Bản đồ vệ tinh – hiệu ứng flycam</option>
+      <option value="hybrid">Kết hợp 2D + 3D + vệ tinh</option>
+    </select>
+    <div class="notice">AI chỉ chọn kiểu bản đồ sau khi xác minh được khu vực và địa điểm. Bản đồ công khai không hiển thị số nhà, tọa độ hoặc ghim chính xác căn nhà.</div>
     <div class="btnrow"><button class="btn primary" id="generate">Tạo phương án dựng thử</button></div>
     <div id="generateStatus" class="status"></div>
   </section>
@@ -157,9 +166,16 @@ $("generate").addEventListener("click",()=>{
  if(missing.length){$("generateStatus").textContent="Anh bổ sung "+missing.join(" và ")+" trước nhé.";return;}
  const style=chooseStyle(),total=durationTarget();
  scenes=makeScenes(total);
- $("summary").textContent="Đề xuất phong cách: "+styleNames[style]+". Thời lượng mục tiêu: "+total+" giây. AI sẽ ưu tiên: "+$("priority").value.toLowerCase()+". Đây là đề xuất sơ bộ, cần anh kiểm tra cảnh thực tế.";
+ const mapNames={auto:"AI tự kết hợp 2D, 3D và vệ tinh tùy căn nhà", "2d":"Bản đồ 2D", "3d":"Bản đồ 3D", satellite:"Bản đồ vệ tinh", hybrid:"Kết hợp 2D + 3D + vệ tinh"};
+ const mapChoice=$("mapStyle").value;
+ const mapText=mapNames[mapChoice] || mapNames.auto;
+ $("summary").textContent="Đề xuất phong cách: "+styleNames[style]+". Thời lượng mục tiêu: "+total+" giây. AI sẽ ưu tiên: "+$("priority").value.toLowerCase()+". Bản đồ: "+mapText+". Đây là đề xuất sơ bộ, cần anh kiểm tra cảnh thực tế.";
  $("timeline").innerHTML="";
  scenes.forEach((s,i)=>{
+  if(s.name==="Vị trí – kết nối"){
+    const mapNames={auto:"AI tự kết hợp 2D, 3D và vệ tinh tùy căn nhà", "2d":"Bản đồ 2D – đường kết nối và tuyến di chuyển", "3d":"Bản đồ 3D – không gian đô thị", satellite:"Bản đồ vệ tinh – hiệu ứng flycam", hybrid:"Kết hợp 2D + 3D + vệ tinh"};
+    s.desc=mapNames[$("mapStyle").value] + ". Chỉ dùng dữ liệu khu vực/tiện ích đã xác minh; không ghim số nhà.";
+  }
   const row=document.createElement("div");row.className="scene";
   const check=document.createElement("input");check.type="checkbox";check.checked=true;check.setAttribute("aria-label","Chọn cảnh");
   const body=document.createElement("div");const title=document.createElement("b");title.textContent=s.name;
