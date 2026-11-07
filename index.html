@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#101a2b">
-<title>Huy Nhà Phố AI Studio – V1.5</title>
+<title>Huy Nhà Phố AI Studio – V1.5.2</title>
 <style>
 :root{--bg:#0b1220;--panel:#121e30;--panel2:#17263b;--line:#263851;--text:#f4f7fb;--muted:#a9b7c9;--gold:#e6bd76;--green:#67d4a0;--blue:#7db7f4}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#0b1220,#111d30 55%,#0c1728);color:var(--text);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:40px}
@@ -34,7 +34,7 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.5</div></div>
+  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.5.2</div></div>
   <section class="hero">
     <h1>Mỗi căn nhà,<br>một câu chuyện riêng.</h1>
     <p>Tải video thực tế, nhập thông tin căn nhà và tạo phương án dựng 30–45 giây. Anh luôn là người duyệt cuối cùng.</p>
@@ -49,8 +49,13 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
       <button class="btn primary" id="newProject" type="button">＋ Tạo dự án mới</button>
       <button class="btn secondary" id="saveProject" type="button">Lưu ngay</button>
     </div>
+    <div class="btnrow">
+      <button class="btn secondary" id="exportBackup" type="button">⬇ Xuất bản sao lưu</button>
+      <button class="btn secondary" id="importBackup" type="button">⬆ Nhập bản sao lưu</button>
+      <input id="backupFile" type="file" accept="application/json,.json" hidden>
+    </div>
     <div id="saveStatus" class="status">Đang khởi tạo bộ nhớ dự án…</div>
-    <div class="notice">Dữ liệu được lưu cục bộ trong Safari trên thiết bị này, không tải lên máy chủ. Không xóa dữ liệu website/Safari nếu muốn giữ dự án. Video được lưu trong bộ nhớ trình duyệt nếu thiết bị còn đủ dung lượng.</div>
+    <div class="notice">Dữ liệu được lưu cục bộ trên thiết bị này. Dùng Xuất/Nhập bản sao lưu để chuyển dự án giữa Safari và ứng dụng màn hình chính. Không xóa dữ liệu website/Safari nếu muốn giữ dự án. Video được lưu trong bộ nhớ trình duyệt nếu thiết bị còn đủ dung lượng.</div>
   </section>
 
   <section class="card">
@@ -156,7 +161,7 @@ Từ đây kết nối thuận tiện đến các trục đường lớn."></tex
     <div class="notice warn">Đây là storyboard thử nghiệm dựa trên thông tin và thời lượng video. Bản V1 này chưa có AI thị giác thực sự để chấm điểm cảnh đẹp, chưa tự cắt ghép hay xuất MP4. Những phần đó cần tích hợp và kiểm thử tiếp.</div>
   </section>
 
-  <div class="footer">HUY NHÀ PHỐ AI STUDIO · V1.5 · Tự lưu dự án cục bộ trên thiết bị</div>
+  <div class="footer">HUY NHÀ PHỐ AI STUDIO · V1.5.2 · Sao lưu/khôi phục dự án cục bộ trên thiết bị</div>
 </div>
 <script>
 const $=id=>document.getElementById(id);
@@ -268,6 +273,30 @@ $("videos").addEventListener("change",()=>{
  const newly=Array.from($("videos").files||[]);
  files=files.concat(newly);renderFiles();scheduleSave();
 });
+
+function blobToDataURL(blob){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error);r.readAsDataURL(blob);});}
+function dataURLToBlob(dataURL){const parts=dataURL.split(',');const mime=(parts[0].match(/data:(.*?);base64/)||[])[1]||'application/octet-stream';const raw=atob(parts[1]||'');const bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);return new Blob([bytes],{type:mime});}
+async function exportBackup(){
+ try{
+  await saveCurrent(false);
+  const all=await dbGetAll();
+  const out=[];
+  for(const p of all){const q={...p,videos:[]};for(const v of (p.videos||[])){q.videos.push({...v,blobData:await blobToDataURL(v.blob),blob:undefined});}out.push(q);}
+  const payload={app:'Huy Nha Pho AI Studio',version:'1.5.2',exportedAt:new Date().toISOString(),projects:out};
+  const blob=new Blob([JSON.stringify(payload)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='Huy-Nha-Pho-sao-luu-'+new Date().toISOString().slice(0,10)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
+  setStatus('Đã tạo bản sao lưu. Hãy lưu tệp JSON vào ứng dụng Tệp trên iPhone.');
+ }catch(e){setStatus('Không xuất được bản sao lưu: '+e.message);}
+}
+async function importBackupFile(file){
+ const text=await file.text();const payload=JSON.parse(text);if(!payload||!Array.isArray(payload.projects))throw new Error('Tệp sao lưu không đúng định dạng.');
+ let count=0;
+ for(const p of payload.projects){const q={...p,videos:[]};for(const v of (p.videos||[])){q.videos.push({...v,blob:dataURLToBlob(v.blobData||'' )});delete q.videos[q.videos.length-1].blobData;}if(!q.id)q.id='import-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);await dbPut(q);count++;}
+ await refreshProjectList();const all=await dbGetAll();all.sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));if(all[0])await loadProject(all[0].id);setStatus('Đã nhập '+count+' dự án từ bản sao lưu.');
+}
+$('exportBackup').addEventListener('click',exportBackup);
+$('importBackup').addEventListener('click',()=>$('backupFile').click());
+$('backupFile').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{await importBackupFile(f);}catch(err){setStatus('Nhập bản sao lưu thất bại: '+err.message);}e.target.value='';});
+
 function makeScenes(total){
  const raw=[["Mở đầu – mặt tiền","Chọn góc mặt tiền rõ, sáng, ít vật cản; đưa giá và diện tích lên sớm.",0.10],["Không gian chung","Ưu tiên phòng khách hoặc lối vào tạo ấn tượng đầu tiên.",0.18],["Khám phá công năng","Bếp, cầu thang, phòng ngủ hoặc WC; chọn cảnh có bố cục rõ.",0.34],["Điểm nổi bật","Chọn chi tiết tốt nhất: ánh sáng, ban công, nội thất hoặc sân thượng.",0.20],["Vị trí – kết nối","Chỉ dùng bản đồ khu vực và tiện ích đã kiểm chứng; không ghim số nhà.",0.18]];
  const durations=raw.map(x=>Math.max(4,Math.floor(total*x[2])));let sum=durations.reduce((a,b)=>a+b,0);
@@ -313,7 +342,21 @@ $("saveProject").addEventListener("click",()=>saveCurrent(true).catch(e=>setStat
 $("newProject").addEventListener("click",()=>createNewProject().catch(e=>setStatus("Không tạo được dự án: "+e.message)));
 $("savedProjects").addEventListener("change",async e=>{if(e.target.value&&e.target.value!==activeProjectId){await saveCurrent(false);await loadProject(e.target.value);}});
 (async()=>{
- try{await openDB();const all=await dbGetAll();if(all.length){await refreshProjectList();const recent=all.sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];await loadProject(recent.id);}else{await createNewProject();}setStatus("Bộ nhớ dự án đã sẵn sàng · tự lưu trên iPhone.");}
+ try{
+   await openDB();
+   const all=await dbGetAll();
+   if(all.length){
+     await refreshProjectList();
+     const recent=all.sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];
+     await loadProject(recent.id);
+     setStatus("Đã khôi phục dự án gần nhất · dữ liệu lưu trên trình duyệt này.");
+   }else{
+     activeProjectId=null;
+     clearForm();
+     await refreshProjectList();
+     setStatus("Chưa có dự án trong vùng lưu trữ này. Nếu anh đã lưu ở Safari, hãy mở lại đúng Safari cũ; không tạo dự án mới vội.");
+   }
+ }
  catch(e){setStatus("Không khởi tạo được bộ nhớ dự án. Hãy mở bằng Safari và thử lại.");}
 })();
 </script>
