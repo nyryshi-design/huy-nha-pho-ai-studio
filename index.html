@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#101a2b">
-<title>Huy Nhà Phố AI Studio – V1</title>
+<title>Huy Nhà Phố AI Studio – V1.5</title>
 <style>
 :root{--bg:#0b1220;--panel:#121e30;--panel2:#17263b;--line:#263851;--text:#f4f7fb;--muted:#a9b7c9;--gold:#e6bd76;--green:#67d4a0;--blue:#7db7f4}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#0b1220,#111d30 55%,#0c1728);color:var(--text);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:40px}
@@ -34,15 +34,27 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1</div></div>
+  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.5</div></div>
   <section class="hero">
     <h1>Mỗi căn nhà,<br>một câu chuyện riêng.</h1>
     <p>Tải video thực tế, nhập thông tin căn nhà và tạo phương án dựng 30–45 giây. Anh luôn là người duyệt cuối cùng.</p>
     <div class="chips"><span class="chip">iPhone-first</span><span class="chip">Video dọc 9:16</span><span class="chip">Ưu tiên miễn phí</span></div>
   </section>
 
+  <section class="card" id="projectManager">
+    <div class="step"><span class="num">P</span><div><h2>Quản lý dự án</h2><div class="small">Tự lưu thông tin và video trên iPhone này. Có thể mở lại dự án đang làm.</div></div></div>
+    <label>Dự án đã lưu</label>
+    <select id="savedProjects"><option value="">Đang tải danh sách dự án…</option></select>
+    <div class="btnrow">
+      <button class="btn primary" id="newProject" type="button">＋ Tạo dự án mới</button>
+      <button class="btn secondary" id="saveProject" type="button">Lưu ngay</button>
+    </div>
+    <div id="saveStatus" class="status">Đang khởi tạo bộ nhớ dự án…</div>
+    <div class="notice">Dữ liệu được lưu cục bộ trong Safari trên thiết bị này, không tải lên máy chủ. Không xóa dữ liệu website/Safari nếu muốn giữ dự án. Video được lưu trong bộ nhớ trình duyệt nếu thiết bị còn đủ dung lượng.</div>
+  </section>
+
   <section class="card">
-    <div class="step"><span class="num">1</span><div><h2>Tạo dự án căn nhà</h2><div class="small">Thông tin dùng để lên kịch bản và kiểm tra nội dung.</div></div></div>
+    <div class="step"><span class="num">1</span><div><h2>Thông tin căn nhà</h2><div class="small">Thông tin dùng để lên kịch bản và kiểm tra nội dung.</div></div></div>
     <label>Tên dự án</label><input id="project" placeholder="Ví dụ: Nhà 3 tầng – Bình Tân">
     <div class="grid">
       <div><label>Giá bán</label><input id="price" placeholder="Nhỉnh 6 tỷ"></div>
@@ -144,139 +156,165 @@ Từ đây kết nối thuận tiện đến các trục đường lớn."></tex
     <div class="notice warn">Đây là storyboard thử nghiệm dựa trên thông tin và thời lượng video. Bản V1 này chưa có AI thị giác thực sự để chấm điểm cảnh đẹp, chưa tự cắt ghép hay xuất MP4. Những phần đó cần tích hợp và kiểm thử tiếp.</div>
   </section>
 
-  <div class="footer">HUY NHÀ PHỐ AI STUDIO · BẢN MẪU V1 · Không tải dữ liệu lên máy chủ</div>
+  <div class="footer">HUY NHÀ PHỐ AI STUDIO · V1.5 · Tự lưu dự án cục bộ trên thiết bị</div>
 </div>
 <script>
 const $=id=>document.getElementById(id);
-let files=[], currentUrl=null, approved=false;
+let files=[], currentUrl=null, approved=false, scenes=[], activeProjectId=null, saveTimer=null;
 const fmt=s=>{if(!Number.isFinite(s))return "—";let m=Math.floor(s/60),r=Math.floor(s%60);return (m?m+"p ":"")+r+"s"};
+const fieldIds=["project","price","area","floors","rooms","address","details","style","duration","ratio","priority","mapStyle","speechType","transcript","speechStart","speechEnd","voice"];
+let db=null, dbReady=false;
+function openDB(){
+ return new Promise((resolve,reject)=>{
+  if(!("indexedDB" in window)){reject(new Error("Trình duyệt không hỗ trợ bộ nhớ dự án"));return;}
+  const req=indexedDB.open("HuyNhaPhoAIStudio",1);
+  req.onupgradeneeded=()=>{const d=req.result;if(!d.objectStoreNames.contains("projects"))d.createObjectStore("projects",{keyPath:"id"});};
+  req.onsuccess=()=>{db=req.result;dbReady=true;resolve(db);};
+  req.onerror=()=>reject(req.error);
+ });
+}
+function txStore(mode="readonly"){return db.transaction("projects",mode).objectStore("projects");}
+function dbGetAll(){return new Promise((resolve,reject)=>{const r=txStore().getAll();r.onsuccess=()=>resolve(r.result||[]);r.onerror=()=>reject(r.error);});}
+function dbGet(id){return new Promise((resolve,reject)=>{const r=txStore().get(id);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
+function dbPut(project){return new Promise((resolve,reject)=>{const t=db.transaction("projects","readwrite");t.objectStore("projects").put(project);t.oncomplete=()=>resolve();t.onerror=()=>reject(t.error);});}
+function dbDelete(id){return new Promise((resolve,reject)=>{const t=db.transaction("projects","readwrite");t.objectStore("projects").delete(id);t.oncomplete=()=>resolve();t.onerror=()=>reject(t.error);});}
+function getFormData(){const data={};fieldIds.forEach(id=>data[id]=$(id)?.value??"");return data;}
+function projectTitle(p){return (p.form?.project||"Dự án chưa đặt tên").trim()||"Dự án chưa đặt tên";}
+function setStatus(msg){$("saveStatus").textContent=msg;}
+function selectedSceneData(){return scenes.map(s=>({name:s.name,desc:s.desc,dur:s.dur,checked:s.checked}));}
+async function saveCurrent(showMessage=false){
+ if(!dbReady||!activeProjectId)return;
+ const old=await dbGet(activeProjectId);
+ const videoRecords=[];
+ for(const f of files){videoRecords.push({name:f.name,type:f.type,size:f.size,lastModified:f.lastModified,blob:f});}
+ const p={id:activeProjectId,updatedAt:Date.now(),form:getFormData(),videos:videoRecords,
+   scenes:selectedSceneData(),generated:!$("result").classList.contains("hidden"),
+   approved,approveStatus:$("approveStatus").textContent,summary:$("summary").textContent,
+   speechResultsVisible:!$("speechResults").classList.contains("hidden"),
+   oldCreatedAt:old?.createdAt||Date.now()};
+ await dbPut(p); await refreshProjectList();
+ if(showMessage)setStatus("Đã lưu dự án: "+projectTitle(p));
+ else setStatus("Tự động lưu · "+new Date().toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"}));
+}
+function scheduleSave(){
+ if(!dbReady||!activeProjectId)return;
+ clearTimeout(saveTimer);setStatus("Đang lưu thay đổi…");
+ saveTimer=setTimeout(()=>saveCurrent(false).catch(e=>setStatus("Chưa lưu được: "+e.message)),650);
+}
+async function refreshProjectList(){
+ const all=(await dbGetAll()).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+ const sel=$("savedProjects"), previous=activeProjectId;
+ sel.innerHTML="";
+ if(!all.length){const o=document.createElement("option");o.value="";o.textContent="Chưa có dự án nào";sel.append(o);return;}
+ all.forEach(p=>{const o=document.createElement("option");o.value=p.id;o.textContent=projectTitle(p)+" · "+new Date(p.updatedAt||p.createdAt).toLocaleDateString("vi-VN");sel.append(o);});
+ sel.value=previous||all[0].id;
+}
+function clearForm(){
+ fieldIds.forEach(id=>{const el=$(id);if(!el)return;if(id==="style")el.value="auto";else if(id==="duration")el.value="30–45 giây";else if(id==="ratio")el.value="9:16 – Video dọc";else if(id==="priority")el.value="Ưu tiên câu chuyện mua ở thực";else if(id==="mapStyle")el.value="auto";else if(id==="speechType")el.value="mixed";else if(id==="speechStart")el.value="0";else if(id==="speechEnd")el.value="45";else if(id==="voice")el.value="Một căn nhà có thể nhìn đẹp qua hình ảnh, nhưng có phù hợp với gia đình mình hay không thì hãy đến xem thực tế cùng Huy nhé!";else el.value="";});
+ files=[];$("videos").value="";$("filelist").innerHTML="";$("videoStatus").textContent="Chưa chọn video.";
+ $("player").pause();$("player").removeAttribute("src");$("player").load();$("player").classList.add("hidden");
+ $("speechResults").classList.add("hidden");$("speechTimeline").innerHTML="";
+ $("result").classList.add("hidden");$("timeline").innerHTML="";$("summary").textContent="";
+ $("generateStatus").textContent="";$("approveStatus").textContent="";
+ scenes=[];approved=false;
+ if(currentUrl){URL.revokeObjectURL(currentUrl);currentUrl=null;}
+}
+async function createNewProject(){
+ if(activeProjectId)await saveCurrent(false);
+ clearForm();
+ activeProjectId="project-"+Date.now()+"-"+Math.random().toString(36).slice(2,7);
+ const p={id:activeProjectId,createdAt:Date.now(),updatedAt:Date.now(),form:getFormData(),videos:[],scenes:[],generated:false};
+ await dbPut(p);await refreshProjectList();$("savedProjects").value=activeProjectId;
+ setStatus("Đã tạo dự án mới. Anh nhập thông tin căn nhà nhé.");
+ $("project").focus();
+}
+async function loadProject(id){
+ if(!id)return;
+ const p=await dbGet(id);if(!p)return;
+ clearForm();activeProjectId=id;
+ Object.entries(p.form||{}).forEach(([k,v])=>{if($(k))$(k).value=v;});
+ files=(p.videos||[]).map(v=>new File([v.blob],v.name,{type:v.type||"video/mp4",lastModified:v.lastModified||Date.now()}));
+ renderFiles();
+ if(p.generated&&files.length){
+   $("generate").click();
+   if(Array.isArray(p.scenes)&&scenes.length){
+     p.scenes.forEach(saved=>{const idx=scenes.findIndex(s=>s.name===saved.name);if(idx>=0){scenes[idx].dur=saved.dur;scenes[idx].checked=saved.checked;}});
+     const rows=Array.from($("timeline").querySelectorAll(".scene"));
+     rows.forEach((row,i)=>{if(scenes[i]){const cb=row.querySelector('input[type="checkbox"]');const sel=row.querySelector("select");if(cb)cb.checked=scenes[i].checked;if(sel)sel.value=String(scenes[i].dur);}});
+     rows.forEach((row,i)=>{const cb=row.querySelector('input[type="checkbox"]');if(cb)cb.dispatchEvent(new Event("change"));});
+   }
+   $("summary").textContent=p.summary||$("summary").textContent;
+ }
+ if(p.speechResultsVisible&&$("transcript").value.trim())$("analyzeSpeech").click();
+ $("approveStatus").textContent=p.approveStatus||"";
+ $("savedProjects").value=id;
+ setStatus("Đã mở dự án: "+projectTitle(p));
+}
+function renderFiles(){
+ $("filelist").innerHTML="";$("player").classList.add("hidden");
+ files.forEach(f=>{
+   const el=document.createElement("div");el.className="fileitem";
+   const img=document.createElement("div");img.className="thumb";img.style.display="grid";img.style.placeItems="center";img.textContent="▶";
+   const meta=document.createElement("div");meta.className="filemeta";
+   const b=document.createElement("b");b.textContent=f.name;
+   const sp=document.createElement("span");sp.textContent=(f.size/1024/1024).toFixed(1)+" MB · Đã lưu trong dự án";
+   meta.append(b,sp);el.append(img,meta);
+   el.addEventListener("click",()=>{if(currentUrl)URL.revokeObjectURL(currentUrl);currentUrl=URL.createObjectURL(f);$("player").src=currentUrl;$("player").classList.remove("hidden");$("videoStatus").textContent="Đang xem trước: "+f.name;});
+   $("filelist").append(el);
+ });
+ $("videoStatus").textContent=files.length?files.length+" video trong dự án. Chạm tên video để xem trước.":"Chưa chọn video.";
+}
 $("videos").addEventListener("change",()=>{
-  files=Array.from($("videos").files||[]);
-  $("filelist").innerHTML=""; $("player").classList.add("hidden");
-  if(currentUrl){URL.revokeObjectURL(currentUrl);currentUrl=null;}
-  files.forEach((f,i)=>{
-    const el=document.createElement("div");el.className="fileitem";
-    const img=document.createElement("div");img.className="thumb";img.style.display="grid";img.style.placeItems="center";img.textContent="▶";
-    const meta=document.createElement("div");meta.className="filemeta";
-    const b=document.createElement("b");b.textContent=f.name;
-    const sp=document.createElement("span");sp.textContent=(f.size/1024/1024).toFixed(1)+" MB";
-    meta.append(b,sp);el.append(img,meta);
-    el.addEventListener("click",()=>{if(currentUrl)URL.revokeObjectURL(currentUrl);currentUrl=URL.createObjectURL(f);$("player").src=currentUrl;$("player").classList.remove("hidden");$("videoStatus").textContent="Đang xem trước: "+f.name;});
-    $("filelist").append(el);
-  });
-  $("videoStatus").textContent=files.length?files.length+" video đã chọn. Chạm vào tên video để xem trước.":"Chưa chọn video.";
+ const newly=Array.from($("videos").files||[]);
+ files=files.concat(newly);renderFiles();scheduleSave();
 });
 function makeScenes(total){
- const raw=[
-  ["Mở đầu – mặt tiền","Chọn góc mặt tiền rõ, sáng, ít vật cản; đưa giá và diện tích lên sớm.",0.10],
-  ["Không gian chung","Ưu tiên phòng khách hoặc lối vào tạo ấn tượng đầu tiên.",0.18],
-  ["Khám phá công năng","Bếp, cầu thang, phòng ngủ hoặc WC; chọn cảnh có bố cục rõ.",0.34],
-  ["Điểm nổi bật","Chọn chi tiết tốt nhất: ánh sáng, ban công, nội thất hoặc sân thượng.",0.20],
-  ["Vị trí – kết nối","Chỉ dùng bản đồ khu vực và tiện ích đã kiểm chứng; không ghim số nhà.",0.18]
- ];
- let cursor=0;
- return raw.map((x,i)=>{let dur=Math.max(4,Math.round(total*x[2]));let start=cursor;cursor+=dur;return {name:x[0],desc:x[1],start,dur,checked:true};});
+ const raw=[["Mở đầu – mặt tiền","Chọn góc mặt tiền rõ, sáng, ít vật cản; đưa giá và diện tích lên sớm.",0.10],["Không gian chung","Ưu tiên phòng khách hoặc lối vào tạo ấn tượng đầu tiên.",0.18],["Khám phá công năng","Bếp, cầu thang, phòng ngủ hoặc WC; chọn cảnh có bố cục rõ.",0.34],["Điểm nổi bật","Chọn chi tiết tốt nhất: ánh sáng, ban công, nội thất hoặc sân thượng.",0.20],["Vị trí – kết nối","Chỉ dùng bản đồ khu vực và tiện ích đã kiểm chứng; không ghim số nhà.",0.18]];
+ const durations=raw.map(x=>Math.max(4,Math.floor(total*x[2])));let sum=durations.reduce((a,b)=>a+b,0);
+ while(sum<total){durations[durations.length-1]++;sum++;}
+ while(sum>total){let idx=durations.findIndex(d=>d>4);if(idx<0)break;durations[idx]--;sum--;}
+ return raw.map((x,i)=>({name:x[0],desc:x[1],dur:durations[i],checked:true}));
 }
 function durationTarget(){let v=$("duration").value;return v.includes("30 giây")?30:v.includes("40 giây")?40:v.includes("45 giây")?45:40;}
-function chooseStyle(){
- const requested=$("style").value, details=($("details").value+" "+$("project").value).toLowerCase();
- if(requested!=="auto")return requested;
- if(/nội thất|sang trọng|cao cấp|hiện đại|đẹp/.test(details))return "cinematic";
- if(/hẻm|đường|aeon|chợ|trường|vị trí|kết nối/.test(details))return "location";
- if(/cũ|sửa|cải tạo|tiềm năng/.test(details))return "potential";
- return "warm";
-}
+function chooseStyle(){const requested=$("style").value,details=($("details").value+" "+$("project").value).toLowerCase();if(requested!=="auto")return requested;if(/nội thất|sang trọng|cao cấp|hiện đại|đẹp/.test(details))return "cinematic";if(/hẻm|đường|aeon|chợ|trường|vị trí|kết nối/.test(details))return "location";if(/cũ|sửa|cải tạo|tiềm năng/.test(details))return "potential";return "warm";}
 const styleNames={cinematic:"Điện ảnh – sang trọng – chân thực",modern:"Hiện đại – năng động",warm:"Gần gũi – cảm xúc",potential:"Hiện trạng – tiềm năng",location:"Vị trí – kết nối"};
-let scenes=[];
 $("generate").addEventListener("click",()=>{
- const missing=[];
- if(!$("project").value.trim())missing.push("tên dự án");
- if(!files.length)missing.push("video căn nhà");
+ const missing=[];if(!$("project").value.trim())missing.push("tên dự án");if(!files.length)missing.push("video căn nhà");
  if(missing.length){$("generateStatus").textContent="Anh bổ sung "+missing.join(" và ")+" trước nhé.";return;}
- const style=chooseStyle(),total=durationTarget();
- scenes=makeScenes(total);
- const mapNames={auto:"AI tự kết hợp 2D, 3D và vệ tinh tùy căn nhà", "2d":"Bản đồ 2D", "3d":"Bản đồ 3D", satellite:"Bản đồ vệ tinh", hybrid:"Kết hợp 2D + 3D + vệ tinh"};
- const mapChoice=$("mapStyle").value;
- const mapText=mapNames[mapChoice] || mapNames.auto;
- $("summary").textContent="Đề xuất phong cách: "+styleNames[style]+". Thời lượng mục tiêu: "+total+" giây. AI sẽ ưu tiên: "+$("priority").value.toLowerCase()+". Bản đồ: "+mapText+". Đây là đề xuất sơ bộ, cần anh kiểm tra cảnh thực tế.";
- $("timeline").innerHTML="";
- scenes.forEach((s,i)=>{
-  if(s.name==="Vị trí – kết nối"){
-    const mapNames={auto:"AI tự kết hợp 2D, 3D và vệ tinh tùy căn nhà", "2d":"Bản đồ 2D – đường kết nối và tuyến di chuyển", "3d":"Bản đồ 3D – không gian đô thị", satellite:"Bản đồ vệ tinh – hiệu ứng flycam", hybrid:"Kết hợp 2D + 3D + vệ tinh"};
-    s.desc=mapNames[$("mapStyle").value] + ". Chỉ dùng dữ liệu khu vực/tiện ích đã xác minh; không ghim số nhà.";
-  }
-  const row=document.createElement("div");row.className="scene";
-  const check=document.createElement("input");check.type="checkbox";check.checked=true;check.setAttribute("aria-label","Chọn cảnh");
-  const body=document.createElement("div");const title=document.createElement("b");title.textContent=s.name;
-  const desc=document.createElement("p");desc.textContent=s.desc;
-  const select=document.createElement("select");[4,5,6,7,8,9,10,12].forEach(n=>{let o=document.createElement("option");o.value=n;o.textContent=n+" giây";if(n===s.dur)o.selected=true;select.append(o);});
-  body.append(title,desc,select);const time=document.createElement("div");time.className="time";time.textContent=fmt(s.start)+" → "+fmt(s.start+s.dur);
-  check.addEventListener("change",()=>{s.checked=check.checked;});
-  select.addEventListener("change",()=>{s.dur=Number(select.value);time.textContent="Thời lượng "+s.dur+"s";});
+ const style=chooseStyle(),total=durationTarget();scenes=makeScenes(total);
+ const mapNames={auto:"AI tự kết hợp 2D, 3D và vệ tinh tùy căn nhà","2d":"Bản đồ 2D","3d":"Bản đồ 3D",satellite:"Bản đồ vệ tinh",hybrid:"Kết hợp 2D + 3D + vệ tinh"};
+ $("summary").textContent="Đề xuất phong cách: "+styleNames[style]+". Thời lượng mục tiêu: "+total+" giây. AI sẽ ưu tiên: "+$("priority").value.toLowerCase()+". Bản đồ: "+(mapNames[$("mapStyle").value]||mapNames.auto)+". Đây là đề xuất sơ bộ, cần anh kiểm tra cảnh thực tế.";
+ $("timeline").innerHTML="";const sceneUIs=[];
+ scenes.forEach(s=>{
+  if(s.name==="Vị trí – kết nối"){const mn={"auto":"AI tự kết hợp 2D, 3D và vệ tinh tùy căn nhà","2d":"Bản đồ 2D – đường kết nối và tuyến di chuyển","3d":"Bản đồ 3D – không gian đô thị","satellite":"Bản đồ vệ tinh – hiệu ứng flycam","hybrid":"Kết hợp 2D + 3D + vệ tinh"};s.desc=mn[$("mapStyle").value]+". Chỉ dùng dữ liệu khu vực/tiện ích đã xác minh; không ghim số nhà.";}
+  const row=document.createElement("div");row.className="scene";const check=document.createElement("input");check.type="checkbox";check.checked=s.checked;
+  const body=document.createElement("div");const title=document.createElement("b");title.textContent=s.name;const desc=document.createElement("p");desc.textContent=s.desc;
+  const select=document.createElement("select");[...new Set([4,5,6,7,8,9,10,12,15,18,20,s.dur])].sort((a,b)=>a-b).forEach(n=>{const o=document.createElement("option");o.value=n;o.textContent=n+" giây";if(n===s.dur)o.selected=true;select.append(o);});
+  body.append(title,desc,select);const time=document.createElement("div");time.className="time";sceneUIs.push({scene:s,check,time,select});
+  check.addEventListener("change",()=>{s.checked=check.checked;recalculateSceneTimes();scheduleSave();});
+  select.addEventListener("change",()=>{s.dur=Number(select.value);recalculateSceneTimes();scheduleSave();});
   row.append(check,body,time);$("timeline").append(row);
  });
- $("result").classList.remove("hidden");$("generateStatus").textContent="Đã tạo phương án dựng thử. Anh kiểm tra từng cảnh bên dưới nhé.";
- $("result").scrollIntoView({behavior:"smooth",block:"start"});
+ function recalculateSceneTimes(){let cursor=0;sceneUIs.forEach(({scene,check,time})=>{scene.checked=check.checked;if(!scene.checked){time.textContent="Bỏ qua";return;}scene.start=cursor;time.textContent=fmt(cursor)+" → "+fmt(cursor+scene.dur)+" ("+scene.dur+"s)";cursor+=scene.dur;});$("summary").textContent=$("summary").textContent.replace(/Thời lượng timeline: [0-9]+ giây\./,"").trim()+" Thời lượng timeline: "+cursor+" giây.";}
+ recalculateSceneTimes();$("result").classList.remove("hidden");$("generateStatus").textContent="Đã tạo phương án dựng thử.";scheduleSave();
 });
-function scriptText(){
- const selected=scenes.filter(s=>s.checked);
- return "HUY NHÀ PHỐ – PHƯƠNG ÁN DỰNG\n"+
- "Dự án: "+$("project").value+"\nGiá: "+$("price").value+"\nDiện tích: "+$("area").value+"\n"+
- "Phong cách: "+styleNames[chooseStyle()]+"\nThời lượng: "+$("duration").value+"\n\n"+
- selected.map((s,i)=>(i+1)+". "+s.name+" – "+s.dur+" giây\n"+s.desc).join("\n\n")+
- "\n\nLời kết: "+$("voice").value+
- "\n\nLưu ý: Không hiển thị số nhà hoặc vị trí chính xác.";
-}
-$("copy").addEventListener("click",async()=>{
- try{await navigator.clipboard.writeText(scriptText());$("approveStatus").textContent="Đã sao chép kịch bản.";}
- catch(e){$("approveStatus").textContent="Trình duyệt chưa cho phép sao chép. Anh có thể chọn và sao chép nội dung thủ công.";}
-});
-$("approve").addEventListener("click",()=>{
- approved=true;
- $("approveStatus").textContent="Đã ghi nhận anh duyệt phương án storyboard. Bước dựng và xuất MP4 sẽ được bổ sung ở phiên bản tiếp theo.";
-});
-
-function classifySpeechLine(line){
- const t=line.toLowerCase();
- if(/phòng ngủ|\bpn\b|wc|nhà vệ sinh|toilet/.test(t))
-   return {kind:"Phòng ngủ / WC",scene:"Chọn cảnh phòng ngủ hoặc WC tương ứng; không dùng cảnh khác để minh họa sai công năng.",map:false};
- if(/bếp|nấu ăn|ăn uống/.test(t))
-   return {kind:"Khu bếp",scene:"Chọn cảnh bếp và khu vực ăn uống nếu có trong video.",map:false};
- if(/phòng khách|sinh hoạt|gia đình|không gian chung|cầu thang/.test(t))
-   return {kind:"Không gian sinh hoạt",scene:"Chọn cảnh phòng khách, cầu thang hoặc không gian chung phù hợp với lời thoại.",map:false};
- if(/hẻm|xe hơi|ô tô|đường vào|lối vào/.test(t))
-   return {kind:"Lối vào / hẻm",scene:"Chọn cảnh đường hẻm, lối tiếp cận hoặc mặt tiền; tránh khẳng định kích thước nếu chưa xác minh.",map:false};
- if(/aeon|mall|siêu thị|chợ|trường|bệnh viện|công viên|nguyễn|lũy bán|kết nối|di chuyển|vị trí|gần|trục đường|đường lớn/.test(t))
-   return {kind:"Vị trí – bản đồ",scene:"Đề xuất bản đồ khu vực 2D/3D/vệ tinh; chỉ hiển thị tiện ích và tuyến đường đã xác minh.",map:true};
- if(/khu dân cư|căn nhà|nhà phố|mặt tiền|giá|diện tích|tầng|kết cấu/.test(t))
-   return {kind:"Giới thiệu căn nhà",scene:"Ưu tiên cảnh mặt tiền, toàn cảnh căn nhà hoặc cảnh anh nói trực tiếp trước camera.",map:false};
- return {kind:"Nội dung cần đối chiếu",scene:"Anh chọn cảnh phù hợp sau khi xem video; Studio chưa tự suy đoán cảnh.",map:false};
-}
+function scriptText(){const selected=scenes.filter(s=>s.checked);return "HUY NHÀ PHỐ – PHƯƠNG ÁN DỰNG\nDự án: "+$("project").value+"\nGiá: "+$("price").value+"\nDiện tích: "+$("area").value+"\nPhong cách: "+styleNames[chooseStyle()]+"\nThời lượng: "+$("duration").value+"\n\n"+selected.map((s,i)=>(i+1)+". "+s.name+" – "+s.dur+" giây\n"+s.desc).join("\n\n")+"\n\nLời kết: "+$("voice").value+"\n\nLưu ý: Không hiển thị số nhà hoặc vị trí chính xác.";}
+$("copy").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(scriptText());$("approveStatus").textContent="Đã sao chép kịch bản.";}catch(e){$("approveStatus").textContent="Trình duyệt chưa cho phép sao chép.";}});
+$("approve").addEventListener("click",()=>{approved=true;$("approveStatus").textContent="Đã ghi nhận anh duyệt phương án storyboard. Bước dựng và xuất MP4 sẽ được bổ sung ở phiên bản tiếp theo.";scheduleSave();});
+function classifySpeechLine(line){const t=line.toLowerCase();if(/phòng ngủ|\bpn\b|wc|nhà vệ sinh|toilet/.test(t))return {kind:"Phòng ngủ / WC",scene:"Chọn cảnh phòng ngủ hoặc WC tương ứng.",map:false};if(/bếp|nấu ăn|ăn uống/.test(t))return {kind:"Khu bếp",scene:"Chọn cảnh bếp và khu vực ăn uống nếu có.",map:false};if(/phòng khách|sinh hoạt|gia đình|không gian chung|cầu thang/.test(t))return {kind:"Không gian sinh hoạt",scene:"Chọn cảnh phòng khách, cầu thang hoặc không gian chung.",map:false};if(/hẻm|xe hơi|ô tô|đường vào|lối vào/.test(t))return {kind:"Lối vào / hẻm",scene:"Chọn cảnh đường hẻm hoặc lối tiếp cận.",map:false};if(/aeon|mall|siêu thị|chợ|trường|bệnh viện|công viên|nguyễn|lũy bán|kết nối|di chuyển|vị trí|gần|trục đường|đường lớn/.test(t))return {kind:"Vị trí – bản đồ",scene:"Đề xuất bản đồ khu vực; chỉ hiển thị tiện ích và tuyến đã xác minh.",map:true};if(/khu dân cư|căn nhà|nhà phố|mặt tiền|giá|diện tích|tầng|kết cấu/.test(t))return {kind:"Giới thiệu căn nhà",scene:"Ưu tiên cảnh mặt tiền hoặc cảnh anh nói trực tiếp.",map:false};return {kind:"Nội dung cần đối chiếu",scene:"Anh chọn cảnh phù hợp sau khi xem video.",map:false};}
 $("analyzeSpeech").addEventListener("click",()=>{
- const lines=$("transcript").value.split(/[\r\n]+/).map(x=>x.trim()).filter(Boolean);
- const start=Math.max(0,Number($("speechStart").value)||0);
- const end=Math.max(start+1,Number($("speechEnd").value)||45);
- if(!lines.length){$("speechTimeline").innerHTML='<div class="notice warn">Anh nhập lời thoại trước nhé.</div>';$("speechResults").classList.remove("hidden");return;}
- const span=(end-start)/lines.length;
- $("speechTimeline").innerHTML="";
- lines.forEach((line,i)=>{
-   const match=classifySpeechLine(line);
-   const type=$("speechType").value;
-   const speechLabel=type==="direct"?"Thoại trực tiếp":type==="voiceover"?"Lồng tiếng":"Cần xác định: trực tiếp / lồng tiếng";
-   const row=document.createElement("div");row.className="scene";
-   const check=document.createElement("input");check.type="checkbox";check.checked=true;
-   const body=document.createElement("div");
-   const title=document.createElement("b");title.textContent=(i+1)+". "+match.kind;
-   const quote=document.createElement("p");quote.textContent="“"+line+"”";
-   const desc=document.createElement("p");desc.textContent=match.scene;
-   const typeTag=document.createElement("p");typeTag.textContent=speechLabel+" · "+(match.map?"Có đề xuất chèn bản đồ":"Không cần bản đồ");
-   body.append(title,quote,desc,typeTag);
-   const time=document.createElement("div");time.className="time";
-   const a=start+i*span,b=i===lines.length-1?end:start+(i+1)*span;
-   time.textContent=fmt(a)+" → "+fmt(b);
-   row.append(check,body,time);$("speechTimeline").append(row);
- });
- $("speechResults").classList.remove("hidden");
+ const lines=$("transcript").value.split(/[\r\n]+/).map(x=>x.trim()).filter(Boolean),start=Math.max(0,Number($("speechStart").value)||0),end=Math.max(start+1,Number($("speechEnd").value)||45);
+ $("speechTimeline").innerHTML="";if(!lines.length){$("speechTimeline").innerHTML='<div class="notice warn">Anh nhập lời thoại trước nhé.</div>';$("speechResults").classList.remove("hidden");return;}
+ const span=(end-start)/lines.length;lines.forEach((line,i)=>{const m=classifySpeechLine(line),row=document.createElement("div");row.className="scene";const cb=document.createElement("input");cb.type="checkbox";cb.checked=true;const body=document.createElement("div"),title=document.createElement("b");title.textContent=(i+1)+". "+m.kind;const quote=document.createElement("p");quote.textContent="“"+line+"”";const desc=document.createElement("p");desc.textContent=m.scene;const tag=document.createElement("p");tag.textContent=($("speechType").value==="direct"?"Thoại trực tiếp":$("speechType").value==="voiceover"?"Lồng tiếng":"Cần xác định trực tiếp / lồng tiếng")+" · "+(m.map?"Có đề xuất chèn bản đồ":"Không cần bản đồ");body.append(title,quote,desc,tag);const time=document.createElement("div");time.className="time";time.textContent=fmt(start+i*span)+" → "+fmt(i===lines.length-1?end:start+(i+1)*span);row.append(cb,body,time);$("speechTimeline").append(row);});
+ $("speechResults").classList.remove("hidden");scheduleSave();
 });
+fieldIds.forEach(id=>{const el=$(id);if(el){el.addEventListener("input",scheduleSave);el.addEventListener("change",scheduleSave);}});
+$("saveProject").addEventListener("click",()=>saveCurrent(true).catch(e=>setStatus("Lỗi lưu: "+e.message)));
+$("newProject").addEventListener("click",()=>createNewProject().catch(e=>setStatus("Không tạo được dự án: "+e.message)));
+$("savedProjects").addEventListener("change",async e=>{if(e.target.value&&e.target.value!==activeProjectId){await saveCurrent(false);await loadProject(e.target.value);}});
+(async()=>{
+ try{await openDB();const all=await dbGetAll();if(all.length){await refreshProjectList();const recent=all.sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];await loadProject(recent.id);}else{await createNewProject();}setStatus("Bộ nhớ dự án đã sẵn sàng · tự lưu trên iPhone.");}
+ catch(e){setStatus("Không khởi tạo được bộ nhớ dự án. Hãy mở bằng Safari và thử lại.");}
+})();
 </script>
 </body></html>
