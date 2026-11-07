@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#101a2b">
-<title>Huy Nhà Phố AI Studio – V1.5.2</title>
+<title>Huy Nhà Phố AI Studio – V1.6</title>
 <style>
 :root{--bg:#0b1220;--panel:#121e30;--panel2:#17263b;--line:#263851;--text:#f4f7fb;--muted:#a9b7c9;--gold:#e6bd76;--green:#67d4a0;--blue:#7db7f4}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#0b1220,#111d30 55%,#0c1728);color:var(--text);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:40px}
@@ -34,7 +34,7 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.5.2</div></div>
+  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.6</div></div>
   <section class="hero">
     <h1>Mỗi căn nhà,<br>một câu chuyện riêng.</h1>
     <p>Tải video thực tế, nhập thông tin căn nhà và tạo phương án dựng 30–45 giây. Anh luôn là người duyệt cuối cùng.</p>
@@ -80,6 +80,22 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
     <div id="videoStatus" class="status">Chưa chọn video.</div>
     <video id="player" class="preview hidden" controls playsinline></video>
     <div class="notice">Bản thử nghiệm này xem trước video ngay trên thiết bị. Chưa tải video lên máy chủ.</div>
+  </section>
+
+
+  <section class="card" id="mediaLibrary">
+    <div class="step"><span class="num">M</span><div><h2>Kho tư liệu căn nhà</h2><div class="small">Gom video dài, clip ngắn, ảnh và file lồng tiếng vào cùng một dự án. Tệp được giữ nguyên, không tự ghép hay chỉnh sửa.</div></div></div>
+    <label>Thêm tư liệu (có thể chọn nhiều tệp)</label>
+    <input id="mediaFiles" type="file" accept="video/*,audio/*,image/*" multiple>
+    <div class="grid" style="margin-top:12px">
+      <div class="notice"><b id="mediaVideoCount">0</b><br>Video</div>
+      <div class="notice"><b id="mediaAudioCount">0</b><br>Âm thanh / lồng tiếng</div>
+      <div class="notice"><b id="mediaImageCount">0</b><br>Hình ảnh</div>
+      <div class="notice"><b id="mediaTotalSize">0 MB</b><br>Tổng dung lượng tư liệu</div>
+    </div>
+    <div id="mediaList" class="filelist"></div>
+    <div id="mediaStatus" class="status">Chưa có tư liệu bổ sung.</div>
+    <div class="notice warn">Lưu ý: V1.6 hiện là kho tư liệu cục bộ và bước chuẩn bị dữ liệu. Ứng dụng chưa tự hiểu nội dung hình/tiếng, chưa tự tìm tiện ích, tạo bản đồ động hoặc xuất MP4. Tệp lớn có thể vượt giới hạn bộ nhớ iPhone. Hãy giữ bản gốc trong Ảnh/Tệp và thêm từng đợt nếu cần.</div>
   </section>
 
   <section class="card">
@@ -158,14 +174,14 @@ Từ đây kết nối thuận tiện đến các trục đường lớn."></tex
       <button class="btn primary" id="approve">Duyệt phương án này</button>
     </div>
     <div id="approveStatus" class="status"></div>
-    <div class="notice warn">Đây là storyboard thử nghiệm dựa trên thông tin và thời lượng video. Bản V1 này chưa có AI thị giác thực sự để chấm điểm cảnh đẹp, chưa tự cắt ghép hay xuất MP4. Những phần đó cần tích hợp và kiểm thử tiếp.</div>
+    <div class="notice warn">Đây là storyboard thử nghiệm dựa trên thông tin và thời lượng video. Bản Bản thử nghiệm hiện chưa có AI thị giác thực sự để chấm điểm cảnh đẹp, chưa tự cắt ghép hay xuất MP4. Những phần đó cần tích hợp và kiểm thử tiếp.</div>
   </section>
 
-  <div class="footer">HUY NHÀ PHỐ AI STUDIO · V1.5.2 · Sao lưu/khôi phục dự án cục bộ trên thiết bị</div>
+  <div class="footer">HUY NHÀ PHỐ AI STUDIO · V1.6 · Kho tư liệu căn nhà</div>
 </div>
 <script>
 const $=id=>document.getElementById(id);
-let files=[], currentUrl=null, approved=false, scenes=[], activeProjectId=null, saveTimer=null;
+let files=[], mediaAssets=[], currentUrl=null, approved=false, scenes=[], activeProjectId=null, saveTimer=null;
 const fmt=s=>{if(!Number.isFinite(s))return "—";let m=Math.floor(s/60),r=Math.floor(s%60);return (m?m+"p ":"")+r+"s"};
 const fieldIds=["project","price","area","floors","rooms","address","details","style","duration","ratio","priority","mapStyle","speechType","transcript","speechStart","speechEnd","voice"];
 let db=null, dbReady=false;
@@ -192,7 +208,8 @@ async function saveCurrent(showMessage=false){
  const old=await dbGet(activeProjectId);
  const videoRecords=[];
  for(const f of files){videoRecords.push({name:f.name,type:f.type,size:f.size,lastModified:f.lastModified,blob:f});}
- const p={id:activeProjectId,updatedAt:Date.now(),form:getFormData(),videos:videoRecords,
+ const mediaRecords=mediaAssets.map(f=>({name:f.name,type:f.type,size:f.size,lastModified:f.lastModified,blob:f}));
+ const p={id:activeProjectId,updatedAt:Date.now(),form:getFormData(),videos:videoRecords,mediaAssets:mediaRecords,
    scenes:selectedSceneData(),generated:!$("result").classList.contains("hidden"),
    approved,approveStatus:$("approveStatus").textContent,summary:$("summary").textContent,
    speechResultsVisible:!$("speechResults").classList.contains("hidden"),
@@ -216,7 +233,7 @@ async function refreshProjectList(){
 }
 function clearForm(){
  fieldIds.forEach(id=>{const el=$(id);if(!el)return;if(id==="style")el.value="auto";else if(id==="duration")el.value="30–45 giây";else if(id==="ratio")el.value="9:16 – Video dọc";else if(id==="priority")el.value="Ưu tiên câu chuyện mua ở thực";else if(id==="mapStyle")el.value="auto";else if(id==="speechType")el.value="mixed";else if(id==="speechStart")el.value="0";else if(id==="speechEnd")el.value="45";else if(id==="voice")el.value="Một căn nhà có thể nhìn đẹp qua hình ảnh, nhưng có phù hợp với gia đình mình hay không thì hãy đến xem thực tế cùng Huy nhé!";else el.value="";});
- files=[];$("videos").value="";$("filelist").innerHTML="";$("videoStatus").textContent="Chưa chọn video.";
+ files=[];mediaAssets=[];$("videos").value="";$("filelist").innerHTML="";$("videoStatus").textContent="Chưa chọn video.";if($("mediaFiles"))$("mediaFiles").value="";if($("mediaList"))renderMediaAssets();
  $("player").pause();$("player").removeAttribute("src");$("player").load();$("player").classList.add("hidden");
  $("speechResults").classList.add("hidden");$("speechTimeline").innerHTML="";
  $("result").classList.add("hidden");$("timeline").innerHTML="";$("summary").textContent="";
@@ -239,7 +256,8 @@ async function loadProject(id){
  clearForm();activeProjectId=id;
  Object.entries(p.form||{}).forEach(([k,v])=>{if($(k))$(k).value=v;});
  files=(p.videos||[]).map(v=>new File([v.blob],v.name,{type:v.type||"video/mp4",lastModified:v.lastModified||Date.now()}));
- renderFiles();
+ mediaAssets=(p.mediaAssets||[]).map(v=>new File([v.blob],v.name,{type:v.type||"application/octet-stream",lastModified:v.lastModified||Date.now()}));
+ renderFiles();renderMediaAssets();
  if(p.generated&&files.length){
    $("generate").click();
    if(Array.isArray(p.scenes)&&scenes.length){
@@ -274,6 +292,41 @@ $("videos").addEventListener("change",()=>{
  files=files.concat(newly);renderFiles();scheduleSave();
 });
 
+
+function mediaKind(file){
+ const t=(file.type||"").toLowerCase();
+ if(t.startsWith("video/"))return "Video";
+ if(t.startsWith("audio/"))return "Âm thanh";
+ if(t.startsWith("image/"))return "Hình ảnh";
+ return "Tệp khác";
+}
+function renderMediaAssets(){
+ const list=$("mediaList");if(!list)return;list.innerHTML="";
+ let vc=0,ac=0,ic=0,total=0;
+ mediaAssets.forEach((f,index)=>{
+  const kind=mediaKind(f);if(kind==="Video")vc++;else if(kind==="Âm thanh")ac++;else if(kind==="Hình ảnh")ic++;total+=f.size||0;
+  const row=document.createElement("div");row.className="fileitem";
+  const thumb=document.createElement("div");thumb.className="thumb";thumb.style.display="grid";thumb.style.placeItems="center";thumb.textContent=kind==="Video"?"▶":kind==="Âm thanh"?"♫":"▧";
+  const meta=document.createElement("div");meta.className="filemeta";
+  const name=document.createElement("b");name.textContent=f.name;
+  const sub=document.createElement("span");sub.textContent=kind+" · "+((f.size||0)/1024/1024).toFixed(1)+" MB";
+  meta.append(name,sub);
+  const remove=document.createElement("button");remove.type="button";remove.className="btn secondary";remove.style.padding="8px 10px";remove.textContent="Xóa";
+  remove.addEventListener("click",()=>{mediaAssets.splice(index,1);renderMediaAssets();scheduleSave();});
+  row.append(thumb,meta,remove);list.append(row);
+ });
+ $("mediaVideoCount").textContent=vc;$("mediaAudioCount").textContent=ac;$("mediaImageCount").textContent=ic;
+ $("mediaTotalSize").textContent=(total/1024/1024).toFixed(1)+" MB";
+ $("mediaStatus").textContent=mediaAssets.length?mediaAssets.length+" tệp tư liệu trong dự án. Tự lưu sau khi thêm.":"Chưa có tư liệu bổ sung.";
+}
+$("mediaFiles").addEventListener("change",()=>{
+ const incoming=Array.from($("mediaFiles").files||[]);
+ const known=new Set(mediaAssets.map(f=>f.name+"|"+f.size+"|"+f.lastModified));
+ const added=incoming.filter(f=>!known.has(f.name+"|"+f.size+"|"+f.lastModified));
+ mediaAssets=mediaAssets.concat(added);renderMediaAssets();scheduleSave();
+ $("mediaFiles").value="";
+});
+
 function blobToDataURL(blob){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error);r.readAsDataURL(blob);});}
 function dataURLToBlob(dataURL){const parts=dataURL.split(',');const mime=(parts[0].match(/data:(.*?);base64/)||[])[1]||'application/octet-stream';const raw=atob(parts[1]||'');const bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);return new Blob([bytes],{type:mime});}
 async function exportBackup(){
@@ -281,8 +334,8 @@ async function exportBackup(){
   await saveCurrent(false);
   const all=await dbGetAll();
   const out=[];
-  for(const p of all){const q={...p,videos:[]};for(const v of (p.videos||[])){q.videos.push({...v,blobData:await blobToDataURL(v.blob),blob:undefined});}out.push(q);}
-  const payload={app:'Huy Nha Pho AI Studio',version:'1.5.2',exportedAt:new Date().toISOString(),projects:out};
+  for(const p of all){const q={...p,videos:[],mediaAssets:[]};for(const v of (p.videos||[])){q.videos.push({...v,blobData:await blobToDataURL(v.blob),blob:undefined});}for(const v of (p.mediaAssets||[])){q.mediaAssets.push({...v,blobData:await blobToDataURL(v.blob),blob:undefined});}out.push(q);}
+  const payload={app:'Huy Nha Pho AI Studio',version:'1.6',exportedAt:new Date().toISOString(),projects:out};
   const blob=new Blob([JSON.stringify(payload)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='Huy-Nha-Pho-sao-luu-'+new Date().toISOString().slice(0,10)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
   setStatus('Đã tạo bản sao lưu. Hãy lưu tệp JSON vào ứng dụng Tệp trên iPhone.');
  }catch(e){setStatus('Không xuất được bản sao lưu: '+e.message);}
@@ -290,7 +343,7 @@ async function exportBackup(){
 async function importBackupFile(file){
  const text=await file.text();const payload=JSON.parse(text);if(!payload||!Array.isArray(payload.projects))throw new Error('Tệp sao lưu không đúng định dạng.');
  let count=0;
- for(const p of payload.projects){const q={...p,videos:[]};for(const v of (p.videos||[])){q.videos.push({...v,blob:dataURLToBlob(v.blobData||'' )});delete q.videos[q.videos.length-1].blobData;}if(!q.id)q.id='import-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);await dbPut(q);count++;}
+ for(const p of payload.projects){const q={...p,videos:[],mediaAssets:[]};for(const v of (p.videos||[])){q.videos.push({...v,blob:dataURLToBlob(v.blobData||'' )});delete q.videos[q.videos.length-1].blobData;}for(const v of (p.mediaAssets||[])){q.mediaAssets.push({...v,blob:dataURLToBlob(v.blobData||'' )});delete q.mediaAssets[q.mediaAssets.length-1].blobData;}if(!q.id)q.id='import-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);await dbPut(q);count++;}
  await refreshProjectList();const all=await dbGetAll();all.sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));if(all[0])await loadProject(all[0].id);setStatus('Đã nhập '+count+' dự án từ bản sao lưu.');
 }
 $('exportBackup').addEventListener('click',exportBackup);
