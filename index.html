@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#101a2b">
-<title>Huy Nhà Phố AI Studio – V1.6.1</title>
+<title>Huy Nhà Phố AI Studio – V1.7</title>
 <style>
 :root{--bg:#0b1220;--panel:#121e30;--panel2:#17263b;--line:#263851;--text:#f4f7fb;--muted:#a9b7c9;--gold:#e6bd76;--green:#67d4a0;--blue:#7db7f4}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#0b1220,#111d30 55%,#0c1728);color:var(--text);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:40px}
@@ -34,7 +34,7 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.6.1</div></div>
+  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.7</div></div>
   <section class="hero">
     <h1>Mỗi căn nhà,<br>một câu chuyện riêng.</h1>
     <p>Tải video thực tế, nhập thông tin căn nhà và tạo phương án dựng 30–45 giây. Anh luôn là người duyệt cuối cùng.</p>
@@ -95,7 +95,18 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
     </div>
     <div id="mediaList" class="filelist"></div>
     <div id="mediaStatus" class="status">Chưa có tư liệu bổ sung.</div>
-    <div class="notice warn">Lưu ý: V1.6.1 hiện là kho tư liệu cục bộ và bước chuẩn bị dữ liệu. Ứng dụng chưa tự hiểu nội dung hình/tiếng, chưa tự tìm tiện ích, tạo bản đồ động hoặc xuất MP4. Tệp lớn có thể vượt giới hạn bộ nhớ iPhone. Hãy giữ bản gốc trong Ảnh/Tệp và thêm từng đợt nếu cần.</div>
+    <div class="notice warn">Lưu ý: V1.7 hiện là kho tư liệu cục bộ và bước chuẩn bị dữ liệu. Ứng dụng chưa tự hiểu nội dung hình/tiếng, chưa tự tìm tiện ích, tạo bản đồ động hoặc xuất MP4. Tệp lớn có thể vượt giới hạn bộ nhớ iPhone. Hãy giữ bản gốc trong Ảnh/Tệp và thêm từng đợt nếu cần.</div>
+  </section>
+
+
+  <section class="card" id="analysisStudio">
+    <div class="step"><span class="num">A</span><div><h2>Phòng phân tích tư liệu</h2><div class="small">Quét thông tin kỹ thuật và trích khung hình xem trước ngay trên iPhone, không tải video lên máy chủ.</div></div></div>
+    <button class="btn primary" type="button" id="scanMedia">🔎 Quét tư liệu trong dự án</button>
+    <div id="scanStatus" class="status">Chưa quét tư liệu.</div>
+    <div id="scanReport" class="filelist"></div>
+    <label style="margin-top:12px">Ghi chú nội dung từng cảnh (anh có thể bổ sung để chuẩn bị cho AI Director)</label>
+    <textarea id="sceneNotes" placeholder="Ví dụ: 00:00 mặt tiền; 00:08 hẻm trước nhà; 00:15 phòng khách; 00:24 bếp; 00:32 phòng ngủ..."></textarea>
+    <div class="notice warn">Giới hạn trung thực: bước quét này đọc được thời lượng, kích thước và ảnh khung hình; chưa tự nhận diện bằng AI xem đó là phòng khách, bếp hay đường sá. Chưa tự nghe/chuyển giọng nói thành chữ. Những phần hiểu nội dung cần tích hợp mô hình AI ở giai đoạn sau.</div>
   </section>
 
   <section class="card">
@@ -210,6 +221,7 @@ async function saveCurrent(showMessage=false){
  for(const f of files){videoRecords.push({name:f.name,type:f.type,size:f.size,lastModified:f.lastModified,blob:f});}
  const mediaRecords=mediaAssets.map(f=>({name:f.name,type:f.type,size:f.size,lastModified:f.lastModified,blob:f}));
  const p={id:activeProjectId,updatedAt:Date.now(),form:getFormData(),videos:videoRecords,mediaAssets:mediaRecords,
+   sceneNotes:$("sceneNotes")?.value||"",scanReport:$("scanReport")?.innerHTML||"",
    scenes:selectedSceneData(),generated:!$("result").classList.contains("hidden"),
    approved,approveStatus:$("approveStatus").textContent,summary:$("summary").textContent,
    speechResultsVisible:!$("speechResults").classList.contains("hidden"),
@@ -256,6 +268,8 @@ async function loadProject(id){
  clearForm();activeProjectId=id;
  Object.entries(p.form||{}).forEach(([k,v])=>{if($(k))$(k).value=v;});
  files=(p.videos||[]).map(v=>new File([v.blob],v.name,{type:v.type||"video/mp4",lastModified:v.lastModified||Date.now()}));
+ if($("sceneNotes"))$("sceneNotes").value=p.sceneNotes||"";
+ if($("scanReport"))$("scanReport").innerHTML=p.scanReport||"";
  mediaAssets=(p.mediaAssets||[]).map(v=>new File([v.blob],v.name,{type:v.type||"application/octet-stream",lastModified:v.lastModified||Date.now()}));
  renderFiles();renderMediaAssets();
  if(p.generated&&files.length){
@@ -328,6 +342,85 @@ $("mediaFiles").addEventListener("change",()=>{
  $("mediaFiles").value="";
 });
 
+
+function formatTime(sec){
+ if(!Number.isFinite(sec))return "Không rõ thời lượng";
+ const m=Math.floor(sec/60),ss=Math.floor(sec%60);
+ return (m?m+" phút ":"")+ss+" giây";
+}
+function mediaInfoCard(file,detail,frames=[]){
+ const wrap=document.createElement("div");wrap.className="fileitem";wrap.style.display="block";
+ const head=document.createElement("div");head.className="filemeta";
+ const title=document.createElement("b");title.textContent=file.name;
+ const sub=document.createElement("span");sub.textContent=mediaKind(file)+" · "+(file.size/1024/1024).toFixed(1)+" MB · "+detail;
+ head.append(title,sub);wrap.append(head);
+ if(frames.length){
+  const strip=document.createElement("div");strip.style.display="grid";strip.style.gridTemplateColumns="repeat(3,minmax(0,1fr))";strip.style.gap="6px";strip.style.marginTop="10px";
+  frames.forEach(fr=>{
+   const box=document.createElement("div");box.style.minWidth="0";
+   const im=document.createElement("img");im.src=fr.url;im.style.width="100%";im.style.aspectRatio="9/16";im.style.objectFit="cover";im.style.borderRadius="8px";
+   const cap=document.createElement("small");cap.textContent=formatTime(fr.time);cap.style.display="block";cap.style.textAlign="center";
+   box.append(im,cap);strip.append(box);
+  });
+  wrap.append(strip);
+ }
+ return wrap;
+}
+function readVideoMeta(file){
+ return new Promise(resolve=>{
+  const url=URL.createObjectURL(file),v=document.createElement("video");
+  v.preload="metadata";v.muted=true;v.playsInline=true;v.src=url;
+  const finish=async()=>{
+   const duration=v.duration,w=v.videoWidth,h=v.videoHeight;
+   const shots=[];
+   if(Number.isFinite(duration)&&duration>0&&w&&h){
+    const times=[Math.min(1,duration/4),duration/2,Math.max(0,duration-1)];
+    for(const t of [...new Set(times.map(x=>Math.max(0,Math.min(x,Math.max(0,duration-.15))))) ]){
+     try{
+      await new Promise(ok=>{const done=()=>ok();v.onseeked=done;v.currentTime=t;setTimeout(ok,1800);});
+      const c=document.createElement("canvas");c.width=Math.min(w,360);c.height=Math.round(c.width*h/w);
+      c.getContext("2d").drawImage(v,0,0,c.width,c.height);
+      shots.push({time:t,url:c.toDataURL("image/jpeg",.65)});
+     }catch(e){}
+    }
+   }
+   URL.revokeObjectURL(url);
+   resolve({detail:formatTime(duration)+" · "+(w&&h?w+"×"+h:"Không đọc được kích thước"),frames:shots});
+  };
+  v.onloadedmetadata=finish;v.onerror=()=>{URL.revokeObjectURL(url);resolve({detail:"Trình duyệt không đọc được metadata định dạng này.",frames:[]});};
+  setTimeout(()=>{if(v.readyState<1){URL.revokeObjectURL(url);resolve({detail:"Quá thời gian đọc metadata.",frames:[]});}},12000);
+ });
+}
+function readAudioMeta(file){
+ return new Promise(resolve=>{
+  const url=URL.createObjectURL(file),a=document.createElement("audio");a.preload="metadata";a.src=url;
+  a.onloadedmetadata=()=>{const d=formatTime(a.duration);URL.revokeObjectURL(url);resolve(d);};
+  a.onerror=()=>{URL.revokeObjectURL(url);resolve("Không đọc được thời lượng trong Safari");};
+  setTimeout(()=>{URL.revokeObjectURL(url);resolve("Không đọc được metadata");},10000);
+ });
+}
+$("scanMedia").addEventListener("click",async()=>{
+ const pool=[...files,...mediaAssets];
+ if(!pool.length){$("scanStatus").textContent="Anh hãy thêm video/âm thanh/hình ảnh vào dự án trước.";return;}
+ const btn=$("scanMedia");btn.disabled=true;$("scanReport").innerHTML="";
+ try{
+  let done=0;
+  for(const f of pool){
+   $("scanStatus").textContent="Đang quét "+(++done)+"/"+pool.length+": "+f.name;
+   const kind=mediaKind(f);let detail="",frames=[];
+   if(kind==="Video"){const r=await readVideoMeta(f);detail=r.detail;frames=r.frames;}
+   else if(kind==="Âm thanh"){detail="Thời lượng: "+await readAudioMeta(f);}
+   else if(kind==="Hình ảnh"){detail="Ảnh · "+(f.type||"định dạng không xác định");}
+   else detail="Tệp chưa nhận dạng";
+   $("scanReport").append(mediaInfoCard(f,detail,frames));
+  }
+  $("scanStatus").textContent="Đã quét "+pool.length+" tư liệu. Khung hình chỉ là ảnh mẫu để xem; chưa có AI hiểu nội dung.";
+  scheduleSave();
+ }catch(e){$("scanStatus").textContent="Quét chưa hoàn tất: "+e.message;}
+ finally{btn.disabled=false;}
+});
+$("sceneNotes").addEventListener("input",scheduleSave);
+
 function blobToDataURL(blob){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error);r.readAsDataURL(blob);});}
 function dataURLToBlob(dataURL){const parts=dataURL.split(',');const mime=(parts[0].match(/data:(.*?);base64/)||[])[1]||'application/octet-stream';const raw=atob(parts[1]||'');const bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);return new Blob([bytes],{type:mime});}
 async function exportBackup(){
@@ -336,7 +429,7 @@ async function exportBackup(){
   const all=await dbGetAll();
   const out=[];
   for(const p of all){const q={...p,videos:[],mediaAssets:[]};for(const v of (p.videos||[])){q.videos.push({...v,blobData:await blobToDataURL(v.blob),blob:undefined});}for(const v of (p.mediaAssets||[])){q.mediaAssets.push({...v,blobData:await blobToDataURL(v.blob),blob:undefined});}out.push(q);}
-  const payload={app:'Huy Nha Pho AI Studio',version:'1.6',exportedAt:new Date().toISOString(),projects:out};
+  const payload={app:'Huy Nha Pho AI Studio',version:'1.7',exportedAt:new Date().toISOString(),projects:out};
   const blob=new Blob([JSON.stringify(payload)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='Huy-Nha-Pho-sao-luu-'+new Date().toISOString().slice(0,10)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
   setStatus('Đã tạo bản sao lưu. Hãy lưu tệp JSON vào ứng dụng Tệp trên iPhone.');
  }catch(e){setStatus('Không xuất được bản sao lưu: '+e.message);}
