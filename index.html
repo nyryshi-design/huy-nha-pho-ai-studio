@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101a2b">
+<title>Huy Nhà Phố AI Studio – V1</title>
+<style>
+:root{--bg:#0b1220;--panel:#121e30;--panel2:#17263b;--line:#263851;--text:#f4f7fb;--muted:#a9b7c9;--gold:#e6bd76;--green:#67d4a0;--blue:#7db7f4}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#0b1220,#111d30 55%,#0c1728);color:var(--text);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:40px}
+.wrap{max-width:760px;margin:auto;padding:16px 14px 40px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:5px 0 18px}
+.brand{font-weight:800;letter-spacing:.08em;font-size:14px}.brand span{color:var(--gold)}.tag{border:1px solid #46617d;border-radius:99px;padding:6px 10px;color:#c5d7eb;font-size:11px}
+h1{font-size:27px;line-height:1.12;margin:0 0 8px}h2{font-size:18px;margin:0 0 12px}h3{font-size:15px;margin:0 0 7px}
+p{color:var(--muted);line-height:1.5;margin:5px 0 0}.hero{padding:20px;border:1px solid #30435b;border-radius:22px;background:radial-gradient(circle at 90% 10%,#33455d 0,transparent 38%),linear-gradient(135deg,#1a2a40,#101a2b);margin-bottom:16px}
+.hero p{max-width:520px}.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:15px}.chip{font-size:11px;border-radius:99px;background:#263950;color:#dbe7f5;padding:6px 9px}
+.card{background:rgba(18,30,48,.96);border:1px solid var(--line);border-radius:18px;padding:16px;margin:13px 0}
+.step{display:flex;gap:10px;align-items:center;margin-bottom:14px}.num{width:28px;height:28px;display:grid;place-items:center;border-radius:9px;background:#293c55;color:var(--gold);font-weight:800}
+label{display:block;font-size:12px;color:#c3d0df;margin:12px 0 6px}
+input,textarea,select{width:100%;border:1px solid #344963;background:#0c1727;color:var(--text);border-radius:11px;padding:12px;font:inherit;outline:none}
+textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-size:13px}input:focus,textarea:focus,select:focus{border-color:var(--blue)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{border:0;border-radius:12px;padding:13px 15px;font-weight:750;font-size:14px;cursor:pointer}
+.primary{background:var(--gold);color:#182235}.secondary{background:#253951;color:#e7f0fb;border:1px solid #3b526d}.btnrow{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+.small{font-size:11px;color:var(--muted)}.notice{padding:11px 12px;border-radius:12px;background:#182b3e;border:1px solid #2e4964;color:#c4d7e9;font-size:12px;line-height:1.45;margin-top:12px}
+.warn{background:#332a1d;border-color:#685331;color:#f3d7a7}
+.filelist{display:grid;gap:8px;margin-top:10px}.fileitem{display:flex;align-items:center;gap:10px;background:#0d1929;border:1px solid #2a3d55;padding:8px;border-radius:12px}.thumb{width:72px;height:52px;object-fit:cover;border-radius:7px;background:#26374c}.filemeta{min-width:0;flex:1}.filemeta b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}.filemeta span{font-size:11px;color:var(--muted)}
+.status{font-size:12px;color:var(--green);margin-top:9px;min-height:18px}
+.styles{display:grid;grid-template-columns:1fr 1fr;gap:9px}.style{padding:11px;border:1px solid #334861;border-radius:12px;background:#0d1929}.style b{display:block;font-size:12px}.style span{font-size:11px;color:var(--muted)}
+.scene{display:grid;grid-template-columns:22px 1fr auto;gap:9px;align-items:start;padding:12px 0;border-bottom:1px solid #263950}.scene:last-child{border:0}.scene input{width:18px;margin:3px 0}.scene b{font-size:13px}.scene p{font-size:11px;margin-top:3px}.time{font-size:11px;color:var(--gold);white-space:nowrap}.scene select{padding:7px;font-size:11px;margin-top:7px}
+.preview{width:100%;max-height:300px;background:#05090f;border-radius:12px;margin-top:10px}
+.footer{text-align:center;color:#7f91a7;font-size:11px;padding:20px 5px}
+.hidden{display:none!important}
+@media(max-width:430px){.grid{grid-template-columns:1fr 1fr}.hero{padding:17px}.hero h1{font-size:25px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1</div></div>
+  <section class="hero">
+    <h1>Mỗi căn nhà,<br>một câu chuyện riêng.</h1>
+    <p>Tải video thực tế, nhập thông tin căn nhà và tạo phương án dựng 30–45 giây. Anh luôn là người duyệt cuối cùng.</p>
+    <div class="chips"><span class="chip">iPhone-first</span><span class="chip">Video dọc 9:16</span><span class="chip">Ưu tiên miễn phí</span></div>
+  </section>
+
+  <section class="card">
+    <div class="step"><span class="num">1</span><div><h2>Tạo dự án căn nhà</h2><div class="small">Thông tin dùng để lên kịch bản và kiểm tra nội dung.</div></div></div>
+    <label>Tên dự án</label><input id="project" placeholder="Ví dụ: Nhà 3 tầng – Bình Tân">
+    <div class="grid">
+      <div><label>Giá bán</label><input id="price" placeholder="Nhỉnh 6 tỷ"></div>
+      <div><label>Diện tích</label><input id="area" placeholder="62 m²"></div>
+      <div><label>Số tầng</label><input id="floors" placeholder="3 tầng"></div>
+      <div><label>Phòng ngủ / WC</label><input id="rooms" placeholder="3 PN / 3 WC"></div>
+    </div>
+    <label>Địa chỉ nội bộ (không đưa lên video)</label><input id="address" placeholder="Nhập địa chỉ để nghiên cứu nội bộ">
+    <label>Thông tin căn nhà và điểm cần nhấn mạnh</label>
+    <textarea id="details" placeholder="Ví dụ: Nhà đúc, hẻm xe hơi sát nhà, nội thất..., pháp lý..., kết nối đường..."></textarea>
+    <div class="notice warn">Bảo mật: địa chỉ đầy đủ chỉ dùng nội bộ. Bản video công khai không hiển thị số nhà, tọa độ hay ghim chính xác.</div>
+  </section>
+
+  <section class="card">
+    <div class="step"><span class="num">2</span><div><h2>Tải video từ iPhone</h2><div class="small">Chọn nhiều video trong Ảnh hoặc Tệp.</div></div></div>
+    <input id="videos" type="file" accept="video/*" multiple>
+    <div id="filelist" class="filelist"></div>
+    <div id="videoStatus" class="status">Chưa chọn video.</div>
+    <video id="player" class="preview hidden" controls playsinline></video>
+    <div class="notice">Bản thử nghiệm này xem trước video ngay trên thiết bị. Chưa tải video lên máy chủ.</div>
+  </section>
+
+  <section class="card">
+    <div class="step"><span class="num">3</span><div><h2>Chọn định hướng dựng</h2><div class="small">AI sẽ đề xuất phong cách theo dữ liệu căn nhà.</div></div></div>
+    <label>Phong cách</label>
+    <select id="style">
+      <option value="auto">AI tự chọn theo căn nhà (khuyến nghị)</option>
+      <option value="cinematic">Điện ảnh – sang trọng – chân thực</option>
+      <option value="modern">Hiện đại – năng động</option>
+      <option value="warm">Gần gũi – cảm xúc</option>
+      <option value="potential">Hiện trạng – tiềm năng</option>
+      <option value="location">Vị trí – kết nối</option>
+    </select>
+    <div class="grid">
+      <div><label>Thời lượng</label><select id="duration"><option>30–45 giây</option><option>30 giây</option><option>40 giây</option><option>45 giây</option></select></div>
+      <div><label>Định dạng</label><select id="ratio"><option>9:16 – Video dọc</option><option>1:1 – Vuông</option><option>16:9 – Ngang</option></select></div>
+    </div>
+    <label>Ưu tiên nội dung</label>
+    <select id="priority"><option>Ưu tiên hình ảnh căn nhà</option><option>Ưu tiên vị trí và tiện ích</option><option>Cân bằng nhà và vị trí</option><option>Ưu tiên câu chuyện mua ở thực</option></select>
+    <div class="btnrow"><button class="btn primary" id="generate">Tạo phương án dựng thử</button></div>
+    <div id="generateStatus" class="status"></div>
+  </section>
+
+  <section class="card hidden" id="result">
+    <div class="step"><span class="num">4</span><div><h2>Phương án dựng đề xuất</h2><div class="small">Anh có thể bỏ chọn hoặc đổi nhóm cảnh trước khi duyệt.</div></div></div>
+    <div id="summary" class="notice"></div>
+    <h3 style="margin-top:16px">Timeline dự kiến</h3>
+    <div id="timeline"></div>
+    <label>Lời dẫn / nội dung kết thúc</label>
+    <textarea id="voice">Một căn nhà có thể nhìn đẹp qua hình ảnh, nhưng có phù hợp với gia đình mình hay không thì hãy đến xem thực tế cùng Huy nhé!</textarea>
+    <label>Phiên bản xuất bản</label>
+    <div class="grid">
+      <div class="style"><b>Facebook Reels</b><span>Có phần liên hệ nếu anh bổ sung khi xuất.</span></div>
+      <div class="style"><b>TikTok</b><span>Không hiển thị số điện thoại.</span></div>
+    </div>
+    <div class="btnrow">
+      <button class="btn secondary" id="copy">Sao chép kịch bản</button>
+      <button class="btn primary" id="approve">Duyệt phương án này</button>
+    </div>
+    <div id="approveStatus" class="status"></div>
+    <div class="notice warn">Đây là storyboard thử nghiệm dựa trên thông tin và thời lượng video. Bản V1 này chưa có AI thị giác thực sự để chấm điểm cảnh đẹp, chưa tự cắt ghép hay xuất MP4. Những phần đó cần tích hợp và kiểm thử tiếp.</div>
+  </section>
+
+  <div class="footer">HUY NHÀ PHỐ AI STUDIO · BẢN MẪU V1 · Không tải dữ liệu lên máy chủ</div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+let files=[], currentUrl=null, approved=false;
+const fmt=s=>{if(!Number.isFinite(s))return "—";let m=Math.floor(s/60),r=Math.floor(s%60);return (m?m+"p ":"")+r+"s"};
+$("videos").addEventListener("change",()=>{
+  files=Array.from($("videos").files||[]);
+  $("filelist").innerHTML=""; $("player").classList.add("hidden");
+  if(currentUrl){URL.revokeObjectURL(currentUrl);currentUrl=null;}
+  files.forEach((f,i)=>{
+    const el=document.createElement("div");el.className="fileitem";
+    const img=document.createElement("div");img.className="thumb";img.style.display="grid";img.style.placeItems="center";img.textContent="▶";
+    const meta=document.createElement("div");meta.className="filemeta";
+    const b=document.createElement("b");b.textContent=f.name;
+    const sp=document.createElement("span");sp.textContent=(f.size/1024/1024).toFixed(1)+" MB";
+    meta.append(b,sp);el.append(img,meta);
+    el.addEventListener("click",()=>{if(currentUrl)URL.revokeObjectURL(currentUrl);currentUrl=URL.createObjectURL(f);$("player").src=currentUrl;$("player").classList.remove("hidden");$("videoStatus").textContent="Đang xem trước: "+f.name;});
+    $("filelist").append(el);
+  });
+  $("videoStatus").textContent=files.length?files.length+" video đã chọn. Chạm vào tên video để xem trước.":"Chưa chọn video.";
+});
+function makeScenes(total){
+ const raw=[
+  ["Mở đầu – mặt tiền","Chọn góc mặt tiền rõ, sáng, ít vật cản; đưa giá và diện tích lên sớm.",0.10],
+  ["Không gian chung","Ưu tiên phòng khách hoặc lối vào tạo ấn tượng đầu tiên.",0.18],
+  ["Khám phá công năng","Bếp, cầu thang, phòng ngủ hoặc WC; chọn cảnh có bố cục rõ.",0.34],
+  ["Điểm nổi bật","Chọn chi tiết tốt nhất: ánh sáng, ban công, nội thất hoặc sân thượng.",0.20],
+  ["Vị trí – kết nối","Chỉ dùng bản đồ khu vực và tiện ích đã kiểm chứng; không ghim số nhà.",0.18]
+ ];
+ let cursor=0;
+ return raw.map((x,i)=>{let dur=Math.max(4,Math.round(total*x[2]));let start=cursor;cursor+=dur;return {name:x[0],desc:x[1],start,dur,checked:true};});
+}
+function durationTarget(){let v=$("duration").value;return v.includes("30 giây")?30:v.includes("40 giây")?40:v.includes("45 giây")?45:40;}
+function chooseStyle(){
+ const requested=$("style").value, details=($("details").value+" "+$("project").value).toLowerCase();
+ if(requested!=="auto")return requested;
+ if(/nội thất|sang trọng|cao cấp|hiện đại|đẹp/.test(details))return "cinematic";
+ if(/hẻm|đường|aeon|chợ|trường|vị trí|kết nối/.test(details))return "location";
+ if(/cũ|sửa|cải tạo|tiềm năng/.test(details))return "potential";
+ return "warm";
+}
+const styleNames={cinematic:"Điện ảnh – sang trọng – chân thực",modern:"Hiện đại – năng động",warm:"Gần gũi – cảm xúc",potential:"Hiện trạng – tiềm năng",location:"Vị trí – kết nối"};
+let scenes=[];
+$("generate").addEventListener("click",()=>{
+ const missing=[];
+ if(!$("project").value.trim())missing.push("tên dự án");
+ if(!files.length)missing.push("video căn nhà");
+ if(missing.length){$("generateStatus").textContent="Anh bổ sung "+missing.join(" và ")+" trước nhé.";return;}
+ const style=chooseStyle(),total=durationTarget();
+ scenes=makeScenes(total);
+ $("summary").textContent="Đề xuất phong cách: "+styleNames[style]+". Thời lượng mục tiêu: "+total+" giây. AI sẽ ưu tiên: "+$("priority").value.toLowerCase()+". Đây là đề xuất sơ bộ, cần anh kiểm tra cảnh thực tế.";
+ $("timeline").innerHTML="";
+ scenes.forEach((s,i)=>{
+  const row=document.createElement("div");row.className="scene";
+  const check=document.createElement("input");check.type="checkbox";check.checked=true;check.setAttribute("aria-label","Chọn cảnh");
+  const body=document.createElement("div");const title=document.createElement("b");title.textContent=s.name;
+  const desc=document.createElement("p");desc.textContent=s.desc;
+  const select=document.createElement("select");[4,5,6,7,8,9,10,12].forEach(n=>{let o=document.createElement("option");o.value=n;o.textContent=n+" giây";if(n===s.dur)o.selected=true;select.append(o);});
+  body.append(title,desc,select);const time=document.createElement("div");time.className="time";time.textContent=fmt(s.start)+" → "+fmt(s.start+s.dur);
+  check.addEventListener("change",()=>{s.checked=check.checked;});
+  select.addEventListener("change",()=>{s.dur=Number(select.value);time.textContent="Thời lượng "+s.dur+"s";});
+  row.append(check,body,time);$("timeline").append(row);
+ });
+ $("result").classList.remove("hidden");$("generateStatus").textContent="Đã tạo phương án dựng thử. Anh kiểm tra từng cảnh bên dưới nhé.";
+ $("result").scrollIntoView({behavior:"smooth",block:"start"});
+});
+function scriptText(){
+ const selected=scenes.filter(s=>s.checked);
+ return "HUY NHÀ PHỐ – PHƯƠNG ÁN DỰNG\n"+
+ "Dự án: "+$("project").value+"\nGiá: "+$("price").value+"\nDiện tích: "+$("area").value+"\n"+
+ "Phong cách: "+styleNames[chooseStyle()]+"\nThời lượng: "+$("duration").value+"\n\n"+
+ selected.map((s,i)=>(i+1)+". "+s.name+" – "+s.dur+" giây\n"+s.desc).join("\n\n")+
+ "\n\nLời kết: "+$("voice").value+
+ "\n\nLưu ý: Không hiển thị số nhà hoặc vị trí chính xác.";
+}
+$("copy").addEventListener("click",async()=>{
+ try{await navigator.clipboard.writeText(scriptText());$("approveStatus").textContent="Đã sao chép kịch bản.";}
+ catch(e){$("approveStatus").textContent="Trình duyệt chưa cho phép sao chép. Anh có thể chọn và sao chép nội dung thủ công.";}
+});
+$("approve").addEventListener("click",()=>{
+ approved=true;
+ $("approveStatus").textContent="Đã ghi nhận anh duyệt phương án storyboard. Bước dựng và xuất MP4 sẽ được bổ sung ở phiên bản tiếp theo.";
+});
+</script>
+</body></html>
