@@ -81,7 +81,7 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
       <div><label>Định dạng</label><select id="ratio"><option>9:16 – Video dọc</option><option>1:1 – Vuông</option><option>16:9 – Ngang</option></select></div>
     </div>
     <label>Ưu tiên nội dung</label>
-    <select id="priority"><option>Ưu tiên hình ảnh căn nhà</option><option>Ưu tiên vị trí và tiện ích</option><option>Cân bằng nhà và vị trí</option><option>Ưu tiên câu chuyện mua ở thực</option></select>
+    <select id="priority"><option>Ưu tiên câu chuyện mua ở thực</option><option>Ưu tiên hình ảnh căn nhà</option><option>Ưu tiên vị trí và tiện ích</option><option>Cân bằng nhà và vị trí</option></select>
     <label>Phong cách bản đồ động</label>
     <select id="mapStyle">
       <option value="auto">AI tự kết hợp 2D, 3D và vệ tinh tùy căn nhà</option>
@@ -91,6 +91,35 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
       <option value="hybrid">Kết hợp 2D + 3D + vệ tinh</option>
     </select>
     <div class="notice">AI chỉ chọn kiểu bản đồ sau khi xác minh được khu vực và địa điểm. Bản đồ công khai không hiển thị số nhà, tọa độ hoặc ghim chính xác căn nhà.</div>
+
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid #263851">
+      <h3>Phân tích lời thoại và đồng bộ hình ảnh</h3>
+      <p class="small">Nhập lời anh nói trực tiếp hoặc lời lồng tiếng. Studio sẽ chia nội dung thành từng ý và đề xuất cảnh tương ứng để anh duyệt.</p>
+      <label>Loại lời thoại</label>
+      <select id="speechType">
+        <option value="mixed">Có cả thoại trực tiếp và lồng tiếng</option>
+        <option value="direct">Chỉ thoại trực tiếp trước camera</option>
+        <option value="voiceover">Chỉ lời lồng tiếng</option>
+      </select>
+      <label>Bản chép lời thoại (mỗi ý một dòng)</label>
+      <textarea id="transcript" rows="5" placeholder="Ví dụ:
+Đây là căn nhà nằm trong khu dân cư hiện hữu.
+Hẻm xe hơi vào sát nhà.
+Phòng khách thoáng, cầu thang bố trí gọn.
+Khu bếp đủ không gian sinh hoạt gia đình.
+Từ đây kết nối thuận tiện đến các trục đường lớn."></textarea>
+      <div class="grid">
+        <div><label>Thời điểm bắt đầu (giây)</label><input id="speechStart" type="number" min="0" value="0" placeholder="0"></div>
+        <div><label>Thời điểm kết thúc (giây)</label><input id="speechEnd" type="number" min="1" value="45" placeholder="45"></div>
+      </div>
+      <div class="notice">Lưu ý: Bản thử nghiệm chưa tự nghe và chép lời từ âm thanh. Anh dán nội dung thoại hoặc bản chép lời vào đây; bước nhận dạng giọng nói tự động sẽ được tích hợp sau khi có dịch vụ phù hợp và kiểm soát được chi phí.</div>
+      <div class="btnrow"><button class="btn secondary" id="analyzeSpeech" type="button">Phân tích lời thoại và gợi ý cảnh</button></div>
+      <div id="speechResults" class="hidden" style="margin-top:12px">
+        <h3>Gợi ý đồng bộ theo từng ý</h3>
+        <div id="speechTimeline"></div>
+      </div>
+    </div>
+
     <div class="btnrow"><button class="btn primary" id="generate">Tạo phương án dựng thử</button></div>
     <div id="generateStatus" class="status"></div>
   </section>
@@ -205,6 +234,49 @@ $("copy").addEventListener("click",async()=>{
 $("approve").addEventListener("click",()=>{
  approved=true;
  $("approveStatus").textContent="Đã ghi nhận anh duyệt phương án storyboard. Bước dựng và xuất MP4 sẽ được bổ sung ở phiên bản tiếp theo.";
+});
+
+function classifySpeechLine(line){
+ const t=line.toLowerCase();
+ if(/aeon|mall|siêu thị|chợ|trường|bệnh viện|công viên|nguyễn|lũy bán|đường|kết nối|di chuyển|vị trí|gần/.test(t))
+   return {kind:"Vị trí – bản đồ",scene:"Bản đồ khu vực 2D/3D/vệ tinh; chỉ hiển thị tiện ích và tuyến đã xác minh.",map:true};
+ if(/phòng ngủ|pn\b|wc|nhà vệ sinh|toilet/.test(t))
+   return {kind:"Phòng ngủ / WC",scene:"Chọn cảnh phòng ngủ hoặc WC tương ứng; không dùng cảnh khác để minh họa sai công năng.",map:false};
+ if(/bếp|nấu ăn|ăn uống/.test(t))
+   return {kind:"Khu bếp",scene:"Chọn cảnh bếp và khu vực ăn uống nếu có trong video.",map:false};
+ if(/phòng khách|sinh hoạt|gia đình|không gian chung/.test(t))
+   return {kind:"Không gian sinh hoạt",scene:"Chọn cảnh phòng khách hoặc không gian chung để khách hình dung sinh hoạt.",map:false};
+ if(/hẻm|xe hơi|ô tô|đường vào|lối vào/.test(t))
+   return {kind:"Lối vào / hẻm",scene:"Chọn cảnh đường hẻm, lối tiếp cận hoặc mặt tiền; tránh khẳng định kích thước nếu chưa xác minh.",map:false};
+ if(/mặt tiền|nhà nằm|căn nhà|nhà phố|giá|diện tích|tầng|kết cấu/.test(t))
+   return {kind:"Giới thiệu căn nhà",scene:"Ưu tiên cảnh mặt tiền hoặc cảnh anh nói trực tiếp trước camera.",map:false};
+ return {kind:"Nội dung cần đối chiếu",scene:"Anh chọn cảnh phù hợp sau khi xem video; Studio chưa tự suy đoán cảnh.",map:false};
+}
+$("analyzeSpeech").addEventListener("click",()=>{
+ const lines=$("transcript").value.split(/\\n+/).map(x=>x.trim()).filter(Boolean);
+ const start=Math.max(0,Number($("speechStart").value)||0);
+ const end=Math.max(start+1,Number($("speechEnd").value)||45);
+ if(!lines.length){$("speechTimeline").innerHTML='<div class="notice warn">Anh nhập lời thoại trước nhé.</div>';$("speechResults").classList.remove("hidden");return;}
+ const span=(end-start)/lines.length;
+ $("speechTimeline").innerHTML="";
+ lines.forEach((line,i)=>{
+   const match=classifySpeechLine(line);
+   const type=$("speechType").value;
+   const speechLabel=type==="direct"?"Thoại trực tiếp":type==="voiceover"?"Lồng tiếng":"Cần xác định: trực tiếp / lồng tiếng";
+   const row=document.createElement("div");row.className="scene";
+   const check=document.createElement("input");check.type="checkbox";check.checked=true;
+   const body=document.createElement("div");
+   const title=document.createElement("b");title.textContent=(i+1)+". "+match.kind;
+   const quote=document.createElement("p");quote.textContent="“"+line+"”";
+   const desc=document.createElement("p");desc.textContent=match.scene;
+   const typeTag=document.createElement("p");typeTag.textContent=speechLabel+" · "+(match.map?"Có đề xuất chèn bản đồ":"Không cần bản đồ");
+   body.append(title,quote,desc,typeTag);
+   const time=document.createElement("div");time.className="time";
+   const a=start+i*span,b=i===lines.length-1?end:start+(i+1)*span;
+   time.textContent=fmt(a)+" → "+fmt(b);
+   row.append(check,body,time);$("speechTimeline").append(row);
+ });
+ $("speechResults").classList.remove("hidden");
 });
 </script>
 </body></html>
