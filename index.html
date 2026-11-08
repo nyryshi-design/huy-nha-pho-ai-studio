@@ -34,7 +34,7 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.8.1</div></div>
+  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.8.2</div></div>
   <section class="hero">
     <h1>Mỗi căn nhà,<br>một câu chuyện riêng.</h1>
     <p>Anh tự chọn thời lượng, bố cục và phong cách. AI phân tích tư liệu để đề xuất cách kể chuyện phù hợp; anh duyệt trước khi dựng.</p>
@@ -204,7 +204,7 @@ Từ đây kết nối thuận tiện đến các trục đường lớn."></tex
     <div class="notice warn">Đây là storyboard thử nghiệm dựa trên thông tin và thời lượng video. Bản Bản thử nghiệm hiện chưa có AI thị giác thực sự để chấm điểm cảnh đẹp, chưa tự cắt ghép hay xuất MP4. Những phần đó cần tích hợp và kiểm thử tiếp.</div>
   </section>
 
-  <div class="footer">HUY NHÀ PHỐ AI STUDIO · V1.8.1 · Sao lưu an toàn và điều khiển sáng tạo</div>
+  <div class="footer">HUY NHÀ PHỐ AI STUDIO · V1.8.2 · Sao lưu an toàn và điều khiển sáng tạo</div>
 </div>
 <script>
 const $=id=>document.getElementById(id);
@@ -440,64 +440,44 @@ $("sceneNotes").addEventListener("input",scheduleSave);
 function blobToDataURL(blob){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error);r.readAsDataURL(blob);});}
 function dataURLToBlob(dataURL){const parts=dataURL.split(',');const mime=(parts[0].match(/data:(.*?);base64/)||[])[1]||'application/octet-stream';const raw=atob(parts[1]||'');const bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);return new Blob([bytes],{type:mime});}
 async function safeBlobToDataURL(blob){
- if(!blob) throw new Error("Thiếu dữ liệu tệp");
- if(!(blob instanceof Blob)) throw new Error("Dữ liệu không còn là Blob hợp lệ");
+ if(!blob) throw new Error("Không tìm thấy dữ liệu tệp");
+ if(!(blob instanceof Blob)) throw new Error("Dữ liệu tệp không còn hợp lệ");
  return await new Promise((resolve,reject)=>{
   const r=new FileReader();
   r.onload=()=>resolve(r.result);
-  r.onerror=()=>reject(r.error||new Error("Không đọc được tệp"));
+  r.onerror=()=>reject(r.error||new Error("iPhone không đọc được tệp"));
   r.onabort=()=>reject(new Error("Đọc tệp bị gián đoạn"));
   try{r.readAsDataURL(blob);}catch(e){reject(e);}
  });
 }
 async function exportBackup(){
- const btn=$("exportBackup");
- if(btn)btn.disabled=true;
+ const btn=$("exportBackup");if(btn)btn.disabled=true;
  try{
-  if(dbReady && activeProjectId){
-   try{await saveCurrent(false);}catch(saveErr){console.warn("Không thể lưu thay đổi trước sao lưu:",saveErr);}
-  }
-  const all=await dbGetAll();
-  const out=[], warnings=[];
+  // Avoid rewriting the active record before backup. Read each media item independently.
+  const all=await dbGetAll(),out=[],warnings=[];
   for(const p of all){
    const q={...p,videos:[],mediaAssets:[]};
    for(const group of ["videos","mediaAssets"]){
-    for(let i=0;i<(p[group]||[]).length;i++){
-     const v=p[group][i];
-     try{
-      const blobData=await safeBlobToDataURL(v.blob);
-      const item={...v,blobData};
-      delete item.blob;
-      q[group].push(item);
-     }catch(err){
-      warnings.push(projectTitle(p)+" – "+(v.name||"Tệp không tên")+": "+err.message);
-      // Keep a metadata-only entry so the user knows which source file was present.
-      const item={...v,blobUnavailable:true};
-      delete item.blob;
-      q[group].push(item);
-     }
+    for(const v of (p[group]||[])){
+     const item={name:v.name||"Tệp không tên",type:v.type||"",size:v.size||0,lastModified:v.lastModified||0};
+     try{item.blobData=await safeBlobToDataURL(v.blob);}
+     catch(err){item.blobUnavailable=true;warnings.push(projectTitle(p)+" – "+item.name+" ("+err.message+")");}
+     q[group].push(item);
     }
    }
    out.push(q);
   }
-  const payload={app:"Huy Nha Pho AI Studio",version:"1.8.1",exportedAt:new Date().toISOString(),projects:out,
-   backupNote:"Các mục blobUnavailable=true chỉ giữ thông tin tệp; nội dung tệp gốc không nằm trong bản sao lưu."};
-  const json=JSON.stringify(payload);
-  const blob=new Blob([json],{type:"application/json"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
+  const payload={app:"Huy Nha Pho AI Studio",version:"1.8.2",exportedAt:new Date().toISOString(),projects:out,
+   warning:warnings.length?"Một số tệp media không đọc được; thông tin dự án và tên tệp vẫn được sao lưu. Không xóa ứng dụng gốc.":""};
+  const blob=new Blob([JSON.stringify(payload)],{type:"application/json"});
+  const url=URL.createObjectURL(blob),a=document.createElement("a");
   a.href=url;a.download="Huy-Nha-Pho-sao-luu-"+new Date().toISOString().slice(0,10)+".json";
-  document.body.append(a);a.click();a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),10000);
-  if(warnings.length){
-   setStatus("Đã tạo bản sao lưu thông tin dự án. Có "+warnings.length+" tệp không đọc được; bản sao lưu sẽ ghi tên các tệp này nhưng không chứa nội dung của chúng. Hãy giữ nguyên ứng dụng và tệp gốc.");
-   console.warn("Các tệp không sao lưu được:",warnings);
-  }else{
-   setStatus("Đã tạo bản sao lưu đầy đủ "+out.length+" dự án. Hãy lưu tệp JSON vào ứng dụng Tệp trên iPhone.");
-  }
- }catch(e){
-  setStatus("Không xuất được bản sao lưu: "+(e?.message||String(e))+". Dữ liệu gốc vẫn được giữ trong ứng dụng; không xóa dữ liệu.");
- }finally{if(btn)btn.disabled=false;}
+  document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
+  setStatus(warnings.length?
+   "Đã tạo bản sao lưu thông tin "+out.length+" dự án. Có "+warnings.length+" tệp media không đọc được; tên tệp đã được ghi lại nhưng nội dung các tệp đó chưa được sao lưu. Giữ nguyên ứng dụng gốc.":
+   "Đã tạo bản sao lưu "+out.length+" dự án cùng các tệp media. Hãy lưu JSON vào ứng dụng Tệp.");
+ }catch(e){setStatus("Không xuất được bản sao lưu: "+(e?.message||String(e))+". Dữ liệu gốc vẫn được giữ; không xóa ứng dụng.");}
+ finally{if(btn)btn.disabled=false;}
 }
 async function importBackupFile(file){
  const text=await file.text();const payload=JSON.parse(text);if(!payload||!Array.isArray(payload.projects))throw new Error('Tệp sao lưu không đúng định dạng.');
