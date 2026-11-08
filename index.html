@@ -34,7 +34,7 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.8.3</div></div>
+  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.8.4</div></div>
   <section class="hero">
     <h1>Mỗi căn nhà,<br>một câu chuyện riêng.</h1>
     <p>Anh tự chọn thời lượng, bố cục và phong cách. AI phân tích tư liệu để đề xuất cách kể chuyện phù hợp; anh duyệt trước khi dựng.</p>
@@ -204,7 +204,7 @@ Từ đây kết nối thuận tiện đến các trục đường lớn."></tex
     <div class="notice warn">Đây là storyboard thử nghiệm dựa trên thông tin và thời lượng video. Bản Bản thử nghiệm hiện chưa có AI thị giác thực sự để chấm điểm cảnh đẹp, chưa tự cắt ghép hay xuất MP4. Những phần đó cần tích hợp và kiểm thử tiếp.</div>
   </section>
 
-  <div class="footer">HUY NHÀ PHỐ AI STUDIO · V1.8.3 · Sao lưu an toàn và điều khiển sáng tạo</div>
+  <div class="footer">HUY NHÀ PHỐ AI STUDIO · V1.8.4 · Sao lưu an toàn và điều khiển sáng tạo</div>
 </div>
 <script>
 const $=id=>document.getElementById(id);
@@ -516,7 +516,7 @@ $("generate").addEventListener("click",()=>{
  if(missing.length){$("generateStatus").textContent="Anh bổ sung "+missing.join(" và ")+" trước nhé.";return;}
  const style=chooseStyle(),total=durationTarget();scenes=makeScenes(total);
  const mapNames={auto:"AI tự kết hợp 2D, 3D và vệ tinh tùy căn nhà","2d":"Bản đồ 2D","3d":"Bản đồ 3D",satellite:"Bản đồ vệ tinh",hybrid:"Kết hợp 2D + 3D + vệ tinh"};
- $("summary").textContent="Đề xuất phong cách: "+styleNames[style]+. Thời lượng mục tiêu: "+total+" giây. Ưu tiên: "+$("priority").value+". Nhịp dựng: "+$("pacing").value+". Hiệu ứng: "+$("effects").value+". Đồ họa: "+$("graphics").value+". Bố cục: "+$("structure").value.replace(/\\n/g," → ")+". Bản đồ: "+(mapNames[$("mapStyle").value]||mapNames.auto)+". Đây mới là phương án storyboard sơ bộ, chưa phải video đã dựng.";
+ $("summary").textContent="Đề xuất phong cách: "+styleNames[style]+". Thời lượng mục tiêu: "+total+" giây. Ưu tiên: "+$("priority").value+". Nhịp dựng: "+$("pacing").value+". Hiệu ứng: "+$("effects").value+". Đồ họa: "+$("graphics").value+". Bố cục: "+$("structure").value.replace(/\\n/g," → ")+". Bản đồ: "+(mapNames[$("mapStyle").value]||mapNames.auto)+". Đây mới là phương án storyboard sơ bộ, chưa phải video đã dựng.";
  $("timeline").innerHTML="";const sceneUIs=[];
  scenes.forEach(s=>{
   if(s.name==="Vị trí – kết nối"){const mn={"auto":"AI tự kết hợp 2D, 3D và vệ tinh tùy căn nhà","2d":"Bản đồ 2D – đường kết nối và tuyến di chuyển","3d":"Bản đồ 3D – không gian đô thị","satellite":"Bản đồ vệ tinh – hiệu ứng flycam","hybrid":"Kết hợp 2D + 3D + vệ tinh"};s.desc=mn[$("mapStyle").value]+". Chỉ dùng dữ liệu khu vực/tiện ích đã xác minh; không ghim số nhà.";}
