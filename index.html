@@ -34,7 +34,7 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.8.4</div></div>
+  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.8.5</div></div>
   <section class="hero">
     <h1>Mỗi căn nhà,<br>một câu chuyện riêng.</h1>
     <p>Anh tự chọn thời lượng, bố cục và phong cách. AI phân tích tư liệu để đề xuất cách kể chuyện phù hợp; anh duyệt trước khi dựng.</p>
@@ -204,7 +204,7 @@ Từ đây kết nối thuận tiện đến các trục đường lớn."></tex
     <div class="notice warn">Đây là storyboard thử nghiệm dựa trên thông tin và thời lượng video. Bản Bản thử nghiệm hiện chưa có AI thị giác thực sự để chấm điểm cảnh đẹp, chưa tự cắt ghép hay xuất MP4. Những phần đó cần tích hợp và kiểm thử tiếp.</div>
   </section>
 
-  <div class="footer">HUY NHÀ PHỐ AI STUDIO · V1.8.4 · Sao lưu an toàn và điều khiển sáng tạo</div>
+  <div class="footer">HUY NHÀ PHỐ AI STUDIO · V1.8.5 · Sao lưu an toàn và điều khiển sáng tạo</div>
 </div>
 <script>
 const $=id=>document.getElementById(id);
@@ -315,7 +315,18 @@ function renderFiles(){
    const meta=document.createElement("div");meta.className="filemeta";
    const b=document.createElement("b");b.textContent=f.name;
    const sp=document.createElement("span");sp.textContent=(f.size/1024/1024).toFixed(1)+" MB · Đã lưu trong dự án";
-   meta.append(b,sp);el.append(img,meta);
+   meta.append(b,sp);
+   const remove=document.createElement("button");
+   remove.type="button";remove.className="btn secondary";remove.style.padding="8px 10px";
+   remove.textContent="Xóa";
+   remove.addEventListener("click",(ev)=>{
+    ev.stopPropagation();
+    if(!confirm("Xóa video "+f.name+" khỏi mục Tải video từ iPhone của dự án này?"))return;
+    if(currentUrl){URL.revokeObjectURL(currentUrl);currentUrl=null;}
+    files.splice(files.indexOf(f),1);
+    renderFiles();scheduleSave();
+   });
+   el.append(img,meta,remove);
    el.addEventListener("click",()=>{if(currentUrl)URL.revokeObjectURL(currentUrl);currentUrl=URL.createObjectURL(f);$("player").src=currentUrl;$("player").classList.remove("hidden");$("videoStatus").textContent="Đang xem trước: "+f.name;});
    $("filelist").append(el);
  });
