@@ -34,7 +34,7 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.8.2</div></div>
+  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.8.3</div></div>
   <section class="hero">
     <h1>Mỗi căn nhà,<br>một câu chuyện riêng.</h1>
     <p>Anh tự chọn thời lượng, bố cục và phong cách. AI phân tích tư liệu để đề xuất cách kể chuyện phù hợp; anh duyệt trước khi dựng.</p>
@@ -204,7 +204,7 @@ Từ đây kết nối thuận tiện đến các trục đường lớn."></tex
     <div class="notice warn">Đây là storyboard thử nghiệm dựa trên thông tin và thời lượng video. Bản Bản thử nghiệm hiện chưa có AI thị giác thực sự để chấm điểm cảnh đẹp, chưa tự cắt ghép hay xuất MP4. Những phần đó cần tích hợp và kiểm thử tiếp.</div>
   </section>
 
-  <div class="footer">HUY NHÀ PHỐ AI STUDIO · V1.8.2 · Sao lưu an toàn và điều khiển sáng tạo</div>
+  <div class="footer">HUY NHÀ PHỐ AI STUDIO · V1.8.3 · Sao lưu an toàn và điều khiển sáng tạo</div>
 </div>
 <script>
 const $=id=>document.getElementById(id);
@@ -214,11 +214,15 @@ const fieldIds=["project","price","area","floors","rooms","address","details","s
 let db=null, dbReady=false;
 function openDB(){
  return new Promise((resolve,reject)=>{
-  if(!("indexedDB" in window)){reject(new Error("Trình duyệt không hỗ trợ bộ nhớ dự án"));return;}
-  const req=indexedDB.open("HuyNhaPhoAIStudio",1);
-  req.onupgradeneeded=()=>{const d=req.result;if(!d.objectStoreNames.contains("projects"))d.createObjectStore("projects",{keyPath:"id"});};
-  req.onsuccess=()=>{db=req.result;dbReady=true;resolve(db);};
-  req.onerror=()=>reject(req.error);
+  if(!("indexedDB" in window)){reject(new Error("iPhone không cung cấp IndexedDB cho trang này"));return;}
+  let settled=false;
+  const timer=setTimeout(()=>{if(!settled){settled=true;reject(new Error("Quá 12 giây mà iPhone chưa mở được kho dữ liệu. Có thể yêu cầu mở DB đang bị chặn hoặc trình duyệt đang treo."));}},12000);
+  let req;
+  try{req=indexedDB.open("HuyNhaPhoAIStudio",1);}catch(err){clearTimeout(timer);reject(new Error("Không gọi được IndexedDB: "+err.message));return;}
+  req.onupgradeneeded=()=>{try{const d=req.result;if(!d.objectStoreNames.contains("projects"))d.createObjectStore("projects",{keyPath:"id"});}catch(err){if(!settled){settled=true;clearTimeout(timer);reject(new Error("Lỗi tạo kho dự án: "+err.message));}}};
+  req.onsuccess=()=>{if(settled){try{req.result.close();}catch(e){}return;}settled=true;clearTimeout(timer);db=req.result;dbReady=true;db.onversionchange=()=>{try{db.close();}catch(e){}dbReady=false;};resolve(db);};
+  req.onerror=()=>{if(!settled){settled=true;clearTimeout(timer);reject(new Error("IndexedDB báo lỗi: "+(req.error?.name||"không rõ")+" – "+(req.error?.message||"không có chi tiết")));}};
+  req.onblocked=()=>{if(!settled){settled=true;clearTimeout(timer);reject(new Error("Yêu cầu mở kho dữ liệu đang bị CHẶN bởi một phiên ứng dụng/trình duyệt khác. Hãy đóng các tab Safari đang mở website rồi thử lại."));}};
  });
 }
 function txStore(mode="readonly"){return db.transaction("projects",mode).objectStore("projects");}
@@ -557,7 +561,7 @@ $("savedProjects").addEventListener("change",async e=>{if(e.target.value&&e.targ
      setStatus("Chưa có dự án trong vùng lưu trữ này. Nếu anh đã lưu ở Safari, hãy mở lại đúng Safari cũ; không tạo dự án mới vội.");
    }
  }
- catch(e){setStatus("Không khởi tạo được bộ nhớ dự án. Hãy mở bằng Safari và thử lại.");}
+ catch(e){setStatus("LỖI KHỞI TẠO: "+(e?.message||String(e))+" · Dữ liệu cũ chưa bị chủ động xóa. Chụp màn hình thông báo này gửi hỗ trợ.");}
 })();
 </script>
 </body></html>
