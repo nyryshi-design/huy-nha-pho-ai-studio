@@ -34,7 +34,7 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.8.5</div></div>
+  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.8.6</div></div>
   <section class="hero">
     <h1>Mỗi căn nhà,<br>một câu chuyện riêng.</h1>
     <p>Anh tự chọn thời lượng, bố cục và phong cách. AI phân tích tư liệu để đề xuất cách kể chuyện phù hợp; anh duyệt trước khi dựng.</p>
@@ -204,7 +204,7 @@ Từ đây kết nối thuận tiện đến các trục đường lớn."></tex
     <div class="notice warn">Đây là storyboard thử nghiệm dựa trên thông tin và thời lượng video. Bản Bản thử nghiệm hiện chưa có AI thị giác thực sự để chấm điểm cảnh đẹp, chưa tự cắt ghép hay xuất MP4. Những phần đó cần tích hợp và kiểm thử tiếp.</div>
   </section>
 
-  <div class="footer">HUY NHÀ PHỐ AI STUDIO · V1.8.5 · Sao lưu an toàn và điều khiển sáng tạo</div>
+  <div class="footer">HUY NHÀ PHỐ AI STUDIO · V1.8.6 · Sao lưu an toàn và điều khiển sáng tạo</div>
 </div>
 <script>
 const $=id=>document.getElementById(id);
@@ -234,26 +234,39 @@ function getFormData(){const data={};fieldIds.forEach(id=>data[id]=$(id)?.value?
 function projectTitle(p){return (p.form?.project||"Dự án chưa đặt tên").trim()||"Dự án chưa đặt tên";}
 function setStatus(msg){$("saveStatus").textContent=msg;}
 function selectedSceneData(){return scenes.map(s=>({name:s.name,desc:s.desc,dur:s.dur,checked:s.checked}));}
+let saveInFlight=null;
 async function saveCurrent(showMessage=false){
- if(!dbReady||!activeProjectId)return;
- const old=await dbGet(activeProjectId);
- const videoRecords=[];
- for(const f of files){videoRecords.push({name:f.name,type:f.type,size:f.size,lastModified:f.lastModified,blob:f});}
- const mediaRecords=mediaAssets.map(f=>({name:f.name,type:f.type,size:f.size,lastModified:f.lastModified,blob:f}));
- const p={id:activeProjectId,updatedAt:Date.now(),form:getFormData(),videos:videoRecords,mediaAssets:mediaRecords,
-   sceneNotes:$("sceneNotes")?.value||"",scanReport:$("scanReport")?.innerHTML||"",
-   scenes:selectedSceneData(),generated:!$("result").classList.contains("hidden"),
-   approved,approveStatus:$("approveStatus").textContent,summary:$("summary").textContent,
-   speechResultsVisible:!$("speechResults").classList.contains("hidden"),
-   oldCreatedAt:old?.createdAt||Date.now()};
- await dbPut(p); await refreshProjectList();
- if(showMessage)setStatus("Đã lưu dự án: "+projectTitle(p));
- else setStatus("Tự động lưu · "+new Date().toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"}));
+ if(saveInFlight) return saveInFlight;
+ saveInFlight=(async()=>{
+  if(!dbReady||!db) throw new Error("Kho dữ liệu chưa sẵn sàng. Anh đừng tải lại trang; hãy thử lưu lại sau.");
+  if(!activeProjectId) throw new Error("Chưa chọn dự án để lưu.");
+  const old=await dbGet(activeProjectId);
+  const videoRecords=[];
+  for(const f of files){videoRecords.push({name:f.name,type:f.type,size:f.size,lastModified:f.lastModified,blob:f});}
+  const mediaRecords=mediaAssets.map(f=>({name:f.name,type:f.type,size:f.size,lastModified:f.lastModified,blob:f}));
+  const p={id:activeProjectId,updatedAt:Date.now(),form:getFormData(),videos:videoRecords,mediaAssets:mediaRecords,
+    sceneNotes:$("sceneNotes")?.value||"",scanReport:$("scanReport")?.innerHTML||"",
+    scenes:selectedSceneData(),generated:!$("result").classList.contains("hidden"),
+    approved,approveStatus:$("approveStatus").textContent,summary:$("summary").textContent,
+    speechResultsVisible:!$("speechResults").classList.contains("hidden"),
+    oldCreatedAt:old?.createdAt||Date.now()};
+  setStatus("Đang ghi dữ liệu vào bộ nhớ…");
+  await dbPut(p);
+  const check=await dbGet(activeProjectId);
+  if(!check || check.updatedAt!==p.updatedAt) throw new Error("Chưa xác minh được dữ liệu sau khi ghi. Anh giữ nguyên ứng dụng và thử xuất bản sao lưu.");
+  await refreshProjectList();
+  $("savedProjects").value=activeProjectId;
+  setStatus("Đã lưu và kiểm tra thành công · "+new Date().toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"}));
+  return true;
+ })();
+ try{return await saveInFlight;}
+ catch(e){setStatus("Lưu chưa hoàn tất: "+(e?.message||"lỗi không xác định"));throw e;}
+ finally{saveInFlight=null;}
 }
 function scheduleSave(){
  if(!dbReady||!activeProjectId)return;
  clearTimeout(saveTimer);setStatus("Đang lưu thay đổi…");
- saveTimer=setTimeout(()=>saveCurrent(false).catch(e=>setStatus("Chưa lưu được: "+e.message)),650);
+ saveTimer=setTimeout(()=>saveCurrent(false).catch(e=>setStatus("Lưu tự động chưa hoàn tất: "+e.message)),900);
 }
 async function refreshProjectList(){
  const all=(await dbGetAll()).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
