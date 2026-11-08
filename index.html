@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#101a2b">
-<title>Huy Nhà Phố AI Studio – V1.9.1</title>
+<title>Huy Nhà Phố AI Studio – V1.10</title>
 <style>
 :root{--bg:#0b1220;--panel:#121e30;--panel2:#17263b;--line:#263851;--text:#f4f7fb;--muted:#a9b7c9;--gold:#e6bd76;--green:#67d4a0;--blue:#7db7f4}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#0b1220,#111d30 55%,#0c1728);color:var(--text);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:40px}
@@ -38,7 +38,7 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.9.1</div></div>
+  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.10</div></div>
   <section class="hero">
     <h1>Mỗi căn nhà,<br>một câu chuyện riêng.</h1>
     <p>Anh tự chọn thời lượng, bố cục và phong cách. AI phân tích tư liệu để đề xuất cách kể chuyện phù hợp; anh duyệt trước khi dựng.</p>
@@ -99,18 +99,18 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
     </div>
     <div id="mediaList" class="filelist"></div>
     <div id="mediaStatus" class="status">Chưa có tư liệu bổ sung.</div>
-    <div class="notice warn">Lưu ý: V1.9.1 hiện là kho tư liệu cục bộ và bước chuẩn bị dữ liệu. Ứng dụng chưa tự hiểu nội dung hình/tiếng, chưa tự tìm tiện ích, tạo bản đồ động hoặc xuất MP4. Tệp lớn có thể vượt giới hạn bộ nhớ iPhone. Hãy giữ bản gốc trong Ảnh/Tệp và thêm từng đợt nếu cần.</div>
+    <div class="notice warn">Lưu ý: V1.10 hiện là kho tư liệu cục bộ và bước chuẩn bị dữ liệu. Ứng dụng chưa tự hiểu nội dung hình/tiếng, chưa tự tìm tiện ích, tạo bản đồ động hoặc xuất MP4. Tệp lớn có thể vượt giới hạn bộ nhớ iPhone. Hãy giữ bản gốc trong Ảnh/Tệp và thêm từng đợt nếu cần.</div>
   </section>
 
 
   <section class="card" id="analysisStudio">
-    <div class="step"><span class="num">A</span><div><h2>Phòng phân tích tư liệu</h2><div class="small">Quét thông tin kỹ thuật và trích khung hình xem trước ngay trên iPhone, không tải video lên máy chủ.</div></div></div>
-    <button class="btn primary" type="button" id="scanMedia">🔎 Quét tư liệu trong dự án</button>
+    <div class="step"><span class="num">A</span><div><h2>Phòng phân tích tư liệu</h2><div class="small">Tự trích khung hình, đánh giá sơ bộ độ sáng/độ rõ và gom tư liệu xem nhanh ngay trên iPhone; không tải video lên máy chủ.</div></div></div>
+    <button class="btn primary" type="button" id="scanMedia">🔎 Phân tích nhanh tư liệu</button>
     <div id="scanStatus" class="status">Chưa quét tư liệu.</div>
     <div id="scanReport" class="filelist"></div>
     <label style="margin-top:12px">Ghi chú nội dung từng cảnh (anh có thể bổ sung để chuẩn bị cho AI Director)</label>
     <textarea id="sceneNotes" placeholder="Ví dụ: 00:00 mặt tiền; 00:08 hẻm trước nhà; 00:15 phòng khách; 00:24 bếp; 00:32 phòng ngủ..."></textarea>
-    <div class="notice warn">Giới hạn trung thực: bước quét này đọc được thời lượng, kích thước và ảnh khung hình; chưa tự nhận diện bằng AI xem đó là phòng khách, bếp hay đường sá. Chưa tự nghe/chuyển giọng nói thành chữ. Những phần hiểu nội dung cần tích hợp mô hình AI ở giai đoạn sau.</div>
+    <div class="notice warn">Lưu ý: bản này tự trích khung hình và đánh giá sơ bộ độ sáng/độ rõ bằng xử lý ảnh cục bộ. Đây chưa phải AI hiểu ngữ nghĩa nên chưa thể tự kết luận ảnh là phòng khách, bếp hay đường vào. Không có dữ liệu nào được tải lên máy chủ.</div>
   </section>
 
   <section class="card">
@@ -205,10 +205,10 @@ Từ đây kết nối thuận tiện đến các trục đường lớn."></tex
       <button class="btn primary" id="approve">Duyệt phương án này</button>
     </div>
     <div id="approveStatus" class="status"></div>
-    <div class="notice warn">V1.9.1 tạo timeline nhiều cảnh, cho phép anh đổi thứ tự, thời lượng, tên/mô tả và gán video/ảnh thủ công. Ứng dụng chưa tự hiểu nội dung hình ảnh, chưa tự cắt ghép hay xuất MP4; việc gán tư liệu hiện do anh chọn.</div>
+    <div class="notice warn">V1.10 tạo timeline nhiều cảnh, cho phép anh đổi thứ tự, thời lượng, tên/mô tả và gán video/ảnh thủ công. Ứng dụng chưa tự hiểu nội dung hình ảnh, chưa tự cắt ghép hay xuất MP4; việc gán tư liệu hiện do anh chọn.</div>
   </section>
 
-  <div class="footer">HUY NHÀ PHỐ AI STUDIO · V1.9.1 · Sao lưu an toàn và điều khiển sáng tạo</div>
+  <div class="footer">HUY NHÀ PHỐ AI STUDIO · V1.10 · Sao lưu an toàn và điều khiển sáng tạo</div>
 </div>
 <script>
 const $=id=>document.getElementById(id);
@@ -396,6 +396,19 @@ function formatTime(sec){
  const m=Math.floor(sec/60),ss=Math.floor(sec%60);
  return (m?m+" phút ":"")+ss+" giây";
 }
+function inspectFrame(canvas){
+ try{
+  const ctx=canvas.getContext('2d',{willReadFrequently:true}),w=canvas.width,h=canvas.height;
+  const d=ctx.getImageData(0,0,w,h).data;let sum=0,sum2=0,edge=0,n=0;
+  for(let y=1;y<h;y+=3){for(let x=1;x<w;x+=3){const i=(y*w+x)*4;const lum=.2126*d[i]+.7152*d[i+1]+.0722*d[i+2];sum+=lum;sum2+=lum*lum;
+   const j=i-4,k=i-w*4;const l1=.2126*d[j]+.7152*d[j+1]+.0722*d[j+2],l2=.2126*d[k]+.7152*d[k+1]+.0722*d[k+2];edge+=Math.abs(lum-l1)+Math.abs(lum-l2);n++;}}
+  const mean=sum/Math.max(1,n),variance=sum2/Math.max(1,n)-mean*mean,sharp=edge/Math.max(1,n);
+  const light=mean<62?'Khá tối':mean>205?'Khá sáng/gắt':'Độ sáng tương đối ổn';
+  const clarity=sharp<13?'Ít chi tiết/ có thể mờ':sharp>38?'Nhiều chi tiết':'Độ rõ trung bình';
+  const brightnessScore=Math.max(0,100-Math.abs(mean-128)*.65),detailScore=Math.min(100,sharp*2.1);
+  return {mean,sharp,score:Math.round(brightnessScore*.45+detailScore*.55),label:light+' · '+clarity};
+ }catch(e){return {score:0,label:'Không đánh giá được khung hình'};}
+}
 function mediaInfoCard(file,detail,frames=[]){
  const wrap=document.createElement("div");wrap.className="fileitem";wrap.style.display="block";
  const head=document.createElement("div");head.className="filemeta";
@@ -408,7 +421,8 @@ function mediaInfoCard(file,detail,frames=[]){
    const box=document.createElement("div");box.style.minWidth="0";
    const im=document.createElement("img");im.src=fr.url;im.style.width="100%";im.style.aspectRatio="9/16";im.style.objectFit="cover";im.style.borderRadius="8px";
    const cap=document.createElement("small");cap.textContent=formatTime(fr.time);cap.style.display="block";cap.style.textAlign="center";
-   box.append(im,cap);strip.append(box);
+   const verdict=document.createElement("small");verdict.textContent=fr.analysis?fr.analysis.label+' · điểm '+fr.analysis.score+'/100':'Chưa đánh giá';verdict.style.display='block';verdict.style.fontSize='10px';verdict.style.color='#9fb4cb';verdict.style.textAlign='center';
+   box.append(im,cap,verdict);strip.append(box);
   });
   wrap.append(strip);
  }
@@ -428,7 +442,7 @@ function readVideoMeta(file){
       await new Promise(ok=>{const done=()=>ok();v.onseeked=done;v.currentTime=t;setTimeout(ok,1800);});
       const c=document.createElement("canvas");c.width=Math.min(w,360);c.height=Math.round(c.width*h/w);
       c.getContext("2d").drawImage(v,0,0,c.width,c.height);
-      shots.push({time:t,url:c.toDataURL("image/jpeg",.65)});
+      shots.push({time:t,url:c.toDataURL("image/jpeg",.65),analysis:inspectFrame(c)});
      }catch(e){}
     }
    }
@@ -462,7 +476,7 @@ $("scanMedia").addEventListener("click",async()=>{
    else detail="Tệp chưa nhận dạng";
    $("scanReport").append(mediaInfoCard(f,detail,frames));
   }
-  $("scanStatus").textContent="Đã quét "+pool.length+" tư liệu. Khung hình chỉ là ảnh mẫu để xem; chưa có AI hiểu nội dung.";
+  $("scanStatus").textContent="Đã quét "+pool.length+" tư liệu. Đã trích khung hình và đánh giá sơ bộ độ sáng/độ rõ trên iPhone. Chưa nhận diện được loại phòng bằng AI.";
   scheduleSave();
  }catch(e){$("scanStatus").textContent="Quét chưa hoàn tất: "+e.message;}
  finally{btn.disabled=false;}
