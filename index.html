@@ -592,7 +592,7 @@ $("generate").addEventListener("click",()=>{
   recalculateSceneTimes();
  }
  renderTimeline();
- recalculateSceneTimes();$("result").classList.remove("hidden");$("generateStatus").textContent="Đã tạo phương án dựng thử.";scheduleSave();
+ $("result").classList.remove("hidden");$("generateStatus").textContent="Đã tạo phương án dựng thử.";scheduleSave();
 });
 function scriptText(){const selected=scenes.filter(s=>s.checked);return "HUY NHÀ PHỐ – PHƯƠNG ÁN DỰNG\nDự án: "+$("project").value+"\nGiá: "+$("price").value+"\nDiện tích: "+$("area").value+"\nPhong cách: "+styleNames[chooseStyle()]+"\nThời lượng: "+$("duration").value+"\n\n"+selected.map((s,i)=>(i+1)+". "+s.name+" – "+s.dur+" giây\n"+s.desc).join("\n\n")+"\n\nLời kết: "+$("voice").value+"\n\nLưu ý: Không hiển thị số nhà hoặc vị trí chính xác.";}
 $("copy").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(scriptText());$("approveStatus").textContent="Đã sao chép kịch bản.";}catch(e){$("approveStatus").textContent="Trình duyệt chưa cho phép sao chép.";}});
