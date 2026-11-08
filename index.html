@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#101a2b">
-<title>Huy Nhà Phố AI Studio – V1.7</title>
+<title>Huy Nhà Phố AI Studio – V1.8</title>
 <style>
 :root{--bg:#0b1220;--panel:#121e30;--panel2:#17263b;--line:#263851;--text:#f4f7fb;--muted:#a9b7c9;--gold:#e6bd76;--green:#67d4a0;--blue:#7db7f4}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#0b1220,#111d30 55%,#0c1728);color:var(--text);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:40px}
@@ -34,10 +34,10 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.7</div></div>
+  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.8</div></div>
   <section class="hero">
     <h1>Mỗi căn nhà,<br>một câu chuyện riêng.</h1>
-    <p>Tải video thực tế, nhập thông tin căn nhà và tạo phương án dựng 30–45 giây. Anh luôn là người duyệt cuối cùng.</p>
+    <p>Anh tự chọn thời lượng, bố cục và phong cách. AI phân tích tư liệu để đề xuất cách kể chuyện phù hợp; anh duyệt trước khi dựng.</p>
     <div class="chips"><span class="chip">iPhone-first</span><span class="chip">Video dọc 9:16</span><span class="chip">Ưu tiên miễn phí</span></div>
   </section>
 
@@ -95,7 +95,7 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
     </div>
     <div id="mediaList" class="filelist"></div>
     <div id="mediaStatus" class="status">Chưa có tư liệu bổ sung.</div>
-    <div class="notice warn">Lưu ý: V1.7 hiện là kho tư liệu cục bộ và bước chuẩn bị dữ liệu. Ứng dụng chưa tự hiểu nội dung hình/tiếng, chưa tự tìm tiện ích, tạo bản đồ động hoặc xuất MP4. Tệp lớn có thể vượt giới hạn bộ nhớ iPhone. Hãy giữ bản gốc trong Ảnh/Tệp và thêm từng đợt nếu cần.</div>
+    <div class="notice warn">Lưu ý: V1.8 hiện là kho tư liệu cục bộ và bước chuẩn bị dữ liệu. Ứng dụng chưa tự hiểu nội dung hình/tiếng, chưa tự tìm tiện ích, tạo bản đồ động hoặc xuất MP4. Tệp lớn có thể vượt giới hạn bộ nhớ iPhone. Hãy giữ bản gốc trong Ảnh/Tệp và thêm từng đợt nếu cần.</div>
   </section>
 
 
@@ -121,11 +121,27 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
       <option value="location">Vị trí – kết nối</option>
     </select>
     <div class="grid">
-      <div><label>Thời lượng</label><select id="duration"><option>30–45 giây</option><option>30 giây</option><option>40 giây</option><option>45 giây</option></select></div>
+      <div><label>Thời lượng mục tiêu (giây)</label><input id="duration" type="number" min="15" max="600" step="5" value="120" inputmode="numeric" placeholder="Ví dụ: 120"></div>
       <div><label>Định dạng</label><select id="ratio"><option>9:16 – Video dọc</option><option>1:1 – Vuông</option><option>16:9 – Ngang</option></select></div>
     </div>
     <label>Ưu tiên nội dung</label>
     <select id="priority"><option>Ưu tiên câu chuyện mua ở thực</option><option>Ưu tiên hình ảnh căn nhà</option><option>Ưu tiên vị trí và tiện ích</option><option>Cân bằng nhà và vị trí</option></select>
+    <label>Bố cục mong muốn (mỗi dòng một phần, có thể sửa tùy căn)</label>
+    <textarea id="structure" rows="5">Mở đầu gây chú ý
+Giới thiệu vị trí và lối vào
+Tham quan toàn bộ không gian bên trong
+Điểm nổi bật và trải nghiệm sống
+Kết thúc – mời khách xem nhà</textarea>
+    <label>Nội dung bắt buộc phải có</label>
+    <textarea id="mustInclude" rows="3" placeholder="Ví dụ: diện tích 62m², 3 tầng, 3 phòng ngủ, hẻm xe hơi..."></textarea>
+    <label>Nhịp dựng</label>
+    <select id="pacing"><option>AI tự điều chỉnh theo nội dung</option><option>Nhanh, cuốn hút</option><option>Vừa phải, rõ ràng</option><option>Chậm, sang trọng, nhiều khoảng thở</option></select>
+    <label>Mức độ hiệu ứng hình ảnh</label>
+    <select id="effects"><option>Thông minh – vừa đủ, đúng lúc</option><option>Nổi bật – nhiều chữ động và chuyển cảnh</option><option>Tối giản – ưu tiên hình ảnh thật</option></select>
+    <label>Phụ đề và đồ họa</label>
+    <select id="graphics"><option>Phụ đề đồng bộ + nhãn thông tin + điểm nhấn động</option><option>Phụ đề tối giản</option><option>Chữ động nổi bật, nhấn giá và ưu điểm</option></select>
+    <label>Yêu cầu riêng cho AI</label>
+    <textarea id="creativeBrief" rows="3" placeholder="Ví dụ: Mở đầu bằng cảnh Huy đứng trước nhà; không dùng hiệu ứng quá lố; ưu tiên cảnh thật..."></textarea>
     <label>Phong cách bản đồ động</label>
     <select id="mapStyle">
       <option value="auto">AI tự kết hợp 2D, 3D và vệ tinh tùy căn nhà</option>
@@ -188,13 +204,13 @@ Từ đây kết nối thuận tiện đến các trục đường lớn."></tex
     <div class="notice warn">Đây là storyboard thử nghiệm dựa trên thông tin và thời lượng video. Bản Bản thử nghiệm hiện chưa có AI thị giác thực sự để chấm điểm cảnh đẹp, chưa tự cắt ghép hay xuất MP4. Những phần đó cần tích hợp và kiểm thử tiếp.</div>
   </section>
 
-  <div class="footer">HUY NHÀ PHỐ AI STUDIO · V1.6 · Kho tư liệu căn nhà</div>
+  <div class="footer">HUY NHÀ PHỐ AI STUDIO · V1.8 · Điều khiển sáng tạo video</div>
 </div>
 <script>
 const $=id=>document.getElementById(id);
 let files=[], mediaAssets=[], currentUrl=null, approved=false, scenes=[], activeProjectId=null, saveTimer=null;
 const fmt=s=>{if(!Number.isFinite(s))return "—";let m=Math.floor(s/60),r=Math.floor(s%60);return (m?m+"p ":"")+r+"s"};
-const fieldIds=["project","price","area","floors","rooms","address","details","style","duration","ratio","priority","mapStyle","speechType","transcript","speechStart","speechEnd","voice"];
+const fieldIds=["project","price","area","floors","rooms","address","details","style","duration","ratio","priority","structure","mustInclude","pacing","effects","graphics","creativeBrief","mapStyle","speechType","transcript","speechStart","speechEnd","voice"];
 let db=null, dbReady=false;
 function openDB(){
  return new Promise((resolve,reject)=>{
@@ -244,7 +260,7 @@ async function refreshProjectList(){
  sel.value=previous||all[0].id;
 }
 function clearForm(){
- fieldIds.forEach(id=>{const el=$(id);if(!el)return;if(id==="style")el.value="auto";else if(id==="duration")el.value="30–45 giây";else if(id==="ratio")el.value="9:16 – Video dọc";else if(id==="priority")el.value="Ưu tiên câu chuyện mua ở thực";else if(id==="mapStyle")el.value="auto";else if(id==="speechType")el.value="mixed";else if(id==="speechStart")el.value="0";else if(id==="speechEnd")el.value="45";else if(id==="voice")el.value="Một căn nhà có thể nhìn đẹp qua hình ảnh, nhưng có phù hợp với gia đình mình hay không thì hãy đến xem thực tế cùng Huy nhé!";else el.value="";});
+ fieldIds.forEach(id=>{const el=$(id);if(!el)return;if(id==="style")el.value="auto";else if(id==="duration")el.value="120";else if(id==="ratio")el.value="9:16 – Video dọc";else if(id==="priority")el.value="Ưu tiên câu chuyện mua ở thực";else if(id==="structure")el.value="Mở đầu gây chú ý\\nGiới thiệu vị trí và lối vào\\nTham quan toàn bộ không gian bên trong\\nĐiểm nổi bật và trải nghiệm sống\\nKết thúc – mời khách xem nhà";else if(id==="pacing")el.value="AI tự điều chỉnh theo nội dung";else if(id==="effects")el.value="Thông minh – vừa đủ, đúng lúc";else if(id==="graphics")el.value="Phụ đề đồng bộ + nhãn thông tin + điểm nhấn động";else if(id==="mapStyle")el.value="auto";else if(id==="speechType")el.value="mixed";else if(id==="speechStart")el.value="0";else if(id==="speechEnd")el.value="45";else if(id==="voice")el.value="Một căn nhà có thể nhìn đẹp qua hình ảnh, nhưng có phù hợp với gia đình mình hay không thì hãy đến xem thực tế cùng Huy nhé!";else el.value="";});
  files=[];mediaAssets=[];$("videos").value="";$("filelist").innerHTML="";$("videoStatus").textContent="Chưa chọn video.";if($("mediaFiles"))$("mediaFiles").value="";if($("mediaList"))renderMediaAssets();
  $("player").pause();$("player").removeAttribute("src");$("player").load();$("player").classList.add("hidden");
  $("speechResults").classList.add("hidden");$("speechTimeline").innerHTML="";
@@ -266,7 +282,7 @@ async function loadProject(id){
  if(!id)return;
  const p=await dbGet(id);if(!p)return;
  clearForm();activeProjectId=id;
- Object.entries(p.form||{}).forEach(([k,v])=>{if($(k))$(k).value=v;});
+ Object.entries(p.form||{}).forEach(([k,v])=>{if($(k))$(k).value=v;});if(!Number.isFinite(Number($("duration").value))||!$("duration").value)$("duration").value="120";
  files=(p.videos||[]).map(v=>new File([v.blob],v.name,{type:v.type||"video/mp4",lastModified:v.lastModified||Date.now()}));
  if($("sceneNotes"))$("sceneNotes").value=p.sceneNotes||"";
  if($("scanReport"))$("scanReport").innerHTML=p.scanReport||"";
@@ -429,7 +445,7 @@ async function exportBackup(){
   const all=await dbGetAll();
   const out=[];
   for(const p of all){const q={...p,videos:[],mediaAssets:[]};for(const v of (p.videos||[])){q.videos.push({...v,blobData:await blobToDataURL(v.blob),blob:undefined});}for(const v of (p.mediaAssets||[])){q.mediaAssets.push({...v,blobData:await blobToDataURL(v.blob),blob:undefined});}out.push(q);}
-  const payload={app:'Huy Nha Pho AI Studio',version:'1.7',exportedAt:new Date().toISOString(),projects:out};
+  const payload={app:'Huy Nha Pho AI Studio',version:'1.8',exportedAt:new Date().toISOString(),projects:out};
   const blob=new Blob([JSON.stringify(payload)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='Huy-Nha-Pho-sao-luu-'+new Date().toISOString().slice(0,10)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
   setStatus('Đã tạo bản sao lưu. Hãy lưu tệp JSON vào ứng dụng Tệp trên iPhone.');
  }catch(e){setStatus('Không xuất được bản sao lưu: '+e.message);}
@@ -445,21 +461,29 @@ $('importBackup').addEventListener('click',()=>$('backupFile').click());
 $('backupFile').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{await importBackupFile(f);}catch(err){setStatus('Nhập bản sao lưu thất bại: '+err.message);}e.target.value='';});
 
 function makeScenes(total){
- const raw=[["Mở đầu – mặt tiền","Chọn góc mặt tiền rõ, sáng, ít vật cản; đưa giá và diện tích lên sớm.",0.10],["Không gian chung","Ưu tiên phòng khách hoặc lối vào tạo ấn tượng đầu tiên.",0.18],["Khám phá công năng","Bếp, cầu thang, phòng ngủ hoặc WC; chọn cảnh có bố cục rõ.",0.34],["Điểm nổi bật","Chọn chi tiết tốt nhất: ánh sáng, ban công, nội thất hoặc sân thượng.",0.20],["Vị trí – kết nối","Chỉ dùng bản đồ khu vực và tiện ích đã kiểm chứng; không ghim số nhà.",0.18]];
- const durations=raw.map(x=>Math.max(4,Math.floor(total*x[2])));let sum=durations.reduce((a,b)=>a+b,0);
+ const defaults=[
+ ["Mở đầu gây chú ý","Cảnh mở đầu mạnh nhất; đưa giá và diện tích lên sớm.",0.12],
+ ["Vị trí và lối vào","Cảnh đường vào/hẻm và bản đồ khu vực đã xác minh.",0.16],
+ ["Tham quan không gian","Phòng khách, bếp, cầu thang, phòng ngủ và WC theo đúng trình tự.",0.42],
+ ["Điểm nổi bật và trải nghiệm sống","Ánh sáng, thông thoáng, công năng và chi tiết đáng chú ý.",0.20],
+ ["Kết thúc – mời khách xem nhà","Huy xuất hiện hoặc cảnh đẹp nhất kèm lời mời xem thực tế.",0.10]
+ ];
+ const custom=($("structure")?.value||"").split(/\\n+/).map(x=>x.trim()).filter(Boolean);
+ const raw=custom.length?custom.map((name,i)=>[name,"AI chọn cảnh phù hợp với phần nội dung này; chỉ sử dụng thông tin đã xác minh.",1/custom.length]):defaults;
+ const durations=raw.map(x=>Math.max(2,Math.floor(total*x[2])));let sum=durations.reduce((a,b)=>a+b,0);
  while(sum<total){durations[durations.length-1]++;sum++;}
- while(sum>total){let idx=durations.findIndex(d=>d>4);if(idx<0)break;durations[idx]--;sum--;}
+ while(sum>total){let idx=durations.findIndex(d=>d>2);if(idx<0)break;durations[idx]--;sum--;}
  return raw.map((x,i)=>({name:x[0],desc:x[1],dur:durations[i],checked:true}));
 }
-function durationTarget(){let v=$("duration").value;return v.includes("30 giây")?30:v.includes("40 giây")?40:v.includes("45 giây")?45:40;}
+function durationTarget(){const n=Math.round(Number($("duration").value)||120);return Math.max(15,Math.min(600,n));}
 function chooseStyle(){const requested=$("style").value,details=($("details").value+" "+$("project").value).toLowerCase();if(requested!=="auto")return requested;if(/nội thất|sang trọng|cao cấp|hiện đại|đẹp/.test(details))return "cinematic";if(/hẻm|đường|aeon|chợ|trường|vị trí|kết nối/.test(details))return "location";if(/cũ|sửa|cải tạo|tiềm năng/.test(details))return "potential";return "warm";}
 const styleNames={cinematic:"Điện ảnh – sang trọng – chân thực",modern:"Hiện đại – năng động",warm:"Gần gũi – cảm xúc",potential:"Hiện trạng – tiềm năng",location:"Vị trí – kết nối"};
 $("generate").addEventListener("click",()=>{
- const missing=[];if(!$("project").value.trim())missing.push("tên dự án");if(!files.length)missing.push("video căn nhà");
+ const missing=[];if(!$("project").value.trim())missing.push("tên dự án");const hasVideo=files.length>0||mediaAssets.some(f=>(f.type||"").startsWith("video/")||/\.(mp4|mov|m4v|webm)$/i.test(f.name));if(!hasVideo)missing.push("ít nhất một video căn nhà trong kho tư liệu");
  if(missing.length){$("generateStatus").textContent="Anh bổ sung "+missing.join(" và ")+" trước nhé.";return;}
  const style=chooseStyle(),total=durationTarget();scenes=makeScenes(total);
  const mapNames={auto:"AI tự kết hợp 2D, 3D và vệ tinh tùy căn nhà","2d":"Bản đồ 2D","3d":"Bản đồ 3D",satellite:"Bản đồ vệ tinh",hybrid:"Kết hợp 2D + 3D + vệ tinh"};
- $("summary").textContent="Đề xuất phong cách: "+styleNames[style]+". Thời lượng mục tiêu: "+total+" giây. AI sẽ ưu tiên: "+$("priority").value.toLowerCase()+". Bản đồ: "+(mapNames[$("mapStyle").value]||mapNames.auto)+". Đây là đề xuất sơ bộ, cần anh kiểm tra cảnh thực tế.";
+ $("summary").textContent="Đề xuất phong cách: "+styleNames[style]+". Thời lượng mục tiêu: "+total+" giây. Ưu tiên: "+$("priority").value+". Nhịp dựng: "+$("pacing").value+". Hiệu ứng: "+$("effects").value+". Đồ họa: "+$("graphics").value+". Bố cục: "+$("structure").value.replace(/\n/g," → ")+". Bản đồ: "+(mapNames[$("mapStyle").value]||mapNames.auto)+". Đây mới là phương án storyboard sơ bộ, chưa phải video đã dựng.";
  $("timeline").innerHTML="";const sceneUIs=[];
  scenes.forEach(s=>{
   if(s.name==="Vị trí – kết nối"){const mn={"auto":"AI tự kết hợp 2D, 3D và vệ tinh tùy căn nhà","2d":"Bản đồ 2D – đường kết nối và tuyến di chuyển","3d":"Bản đồ 3D – không gian đô thị","satellite":"Bản đồ vệ tinh – hiệu ứng flycam","hybrid":"Kết hợp 2D + 3D + vệ tinh"};s.desc=mn[$("mapStyle").value]+". Chỉ dùng dữ liệu khu vực/tiện ích đã xác minh; không ghim số nhà.";}
@@ -476,7 +500,7 @@ $("generate").addEventListener("click",()=>{
 });
 function scriptText(){const selected=scenes.filter(s=>s.checked);return "HUY NHÀ PHỐ – PHƯƠNG ÁN DỰNG\nDự án: "+$("project").value+"\nGiá: "+$("price").value+"\nDiện tích: "+$("area").value+"\nPhong cách: "+styleNames[chooseStyle()]+"\nThời lượng: "+$("duration").value+"\n\n"+selected.map((s,i)=>(i+1)+". "+s.name+" – "+s.dur+" giây\n"+s.desc).join("\n\n")+"\n\nLời kết: "+$("voice").value+"\n\nLưu ý: Không hiển thị số nhà hoặc vị trí chính xác.";}
 $("copy").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(scriptText());$("approveStatus").textContent="Đã sao chép kịch bản.";}catch(e){$("approveStatus").textContent="Trình duyệt chưa cho phép sao chép.";}});
-$("approve").addEventListener("click",()=>{approved=true;$("approveStatus").textContent="Đã ghi nhận anh duyệt phương án storyboard. Bước dựng và xuất MP4 sẽ được bổ sung ở phiên bản tiếp theo.";scheduleSave();});
+$("approve").addEventListener("click",()=>{approved=true;$("approveStatus").textContent="Đã ghi nhận anh duyệt phương án storyboard. Hiện tại nút này chỉ ghi nhận anh duyệt storyboard; chưa dựng hoặc xuất MP4 thật.";scheduleSave();});
 function classifySpeechLine(line){const t=line.toLowerCase();if(/phòng ngủ|\bpn\b|wc|nhà vệ sinh|toilet/.test(t))return {kind:"Phòng ngủ / WC",scene:"Chọn cảnh phòng ngủ hoặc WC tương ứng.",map:false};if(/bếp|nấu ăn|ăn uống/.test(t))return {kind:"Khu bếp",scene:"Chọn cảnh bếp và khu vực ăn uống nếu có.",map:false};if(/phòng khách|sinh hoạt|gia đình|không gian chung|cầu thang/.test(t))return {kind:"Không gian sinh hoạt",scene:"Chọn cảnh phòng khách, cầu thang hoặc không gian chung.",map:false};if(/hẻm|xe hơi|ô tô|đường vào|lối vào/.test(t))return {kind:"Lối vào / hẻm",scene:"Chọn cảnh đường hẻm hoặc lối tiếp cận.",map:false};if(/aeon|mall|siêu thị|chợ|trường|bệnh viện|công viên|nguyễn|lũy bán|kết nối|di chuyển|vị trí|gần|trục đường|đường lớn/.test(t))return {kind:"Vị trí – bản đồ",scene:"Đề xuất bản đồ khu vực; chỉ hiển thị tiện ích và tuyến đã xác minh.",map:true};if(/khu dân cư|căn nhà|nhà phố|mặt tiền|giá|diện tích|tầng|kết cấu/.test(t))return {kind:"Giới thiệu căn nhà",scene:"Ưu tiên cảnh mặt tiền hoặc cảnh anh nói trực tiếp.",map:false};return {kind:"Nội dung cần đối chiếu",scene:"Anh chọn cảnh phù hợp sau khi xem video.",map:false};}
 $("analyzeSpeech").addEventListener("click",()=>{
  const lines=$("transcript").value.split(/[\r\n]+/).map(x=>x.trim()).filter(Boolean),start=Math.max(0,Number($("speechStart").value)||0),end=Math.max(start+1,Number($("speechEnd").value)||45);
