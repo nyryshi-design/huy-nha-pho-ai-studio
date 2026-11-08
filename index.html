@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#101a2b">
-<title>Huy Nhà Phố AI Studio – V1.8</title>
+<title>Huy Nhà Phố AI Studio – V1.9</title>
 <style>
 :root{--bg:#0b1220;--panel:#121e30;--panel2:#17263b;--line:#263851;--text:#f4f7fb;--muted:#a9b7c9;--gold:#e6bd76;--green:#67d4a0;--blue:#7db7f4}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#0b1220,#111d30 55%,#0c1728);color:var(--text);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:40px}
@@ -26,6 +26,10 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
 .status{font-size:12px;color:var(--green);margin-top:9px;min-height:18px}
 .styles{display:grid;grid-template-columns:1fr 1fr;gap:9px}.style{padding:11px;border:1px solid #334861;border-radius:12px;background:#0d1929}.style b{display:block;font-size:12px}.style span{font-size:11px;color:var(--muted)}
 .scene{display:grid;grid-template-columns:22px 1fr auto;gap:9px;align-items:start;padding:12px 0;border-bottom:1px solid #263950}.scene:last-child{border:0}.scene input{width:18px;margin:3px 0}.scene b{font-size:13px}.scene p{font-size:11px;margin-top:3px}.time{font-size:11px;color:var(--gold);white-space:nowrap}.scene select{padding:7px;font-size:11px;margin-top:7px}
+.scene-tools{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.scene-tools button{background:#263950;color:#e7f0fb;border:1px solid #405773;border-radius:8px;padding:6px 9px;font-size:11px}
+.scene-asset{font-size:11px;color:#c4d7e9;margin-top:7px}
+.scene-asset select{width:100%;max-width:100%;}
 .preview{width:100%;max-height:300px;background:#05090f;border-radius:12px;margin-top:10px}
 .footer{text-align:center;color:#7f91a7;font-size:11px;padding:20px 5px}
 .hidden{display:none!important}
@@ -34,7 +38,7 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.8.6</div></div>
+  <div class="top"><div class="brand">HUY <span>NHÀ PHỐ</span> · AI STUDIO</div><div class="tag">BẢN THỬ NGHIỆM V1.9</div></div>
   <section class="hero">
     <h1>Mỗi căn nhà,<br>một câu chuyện riêng.</h1>
     <p>Anh tự chọn thời lượng, bố cục và phong cách. AI phân tích tư liệu để đề xuất cách kể chuyện phù hợp; anh duyệt trước khi dựng.</p>
@@ -95,7 +99,7 @@ textarea{min-height:104px;resize:vertical}input[type=file]{padding:11px;font-siz
     </div>
     <div id="mediaList" class="filelist"></div>
     <div id="mediaStatus" class="status">Chưa có tư liệu bổ sung.</div>
-    <div class="notice warn">Lưu ý: V1.8 hiện là kho tư liệu cục bộ và bước chuẩn bị dữ liệu. Ứng dụng chưa tự hiểu nội dung hình/tiếng, chưa tự tìm tiện ích, tạo bản đồ động hoặc xuất MP4. Tệp lớn có thể vượt giới hạn bộ nhớ iPhone. Hãy giữ bản gốc trong Ảnh/Tệp và thêm từng đợt nếu cần.</div>
+    <div class="notice warn">Lưu ý: V1.9 hiện là kho tư liệu cục bộ và bước chuẩn bị dữ liệu. Ứng dụng chưa tự hiểu nội dung hình/tiếng, chưa tự tìm tiện ích, tạo bản đồ động hoặc xuất MP4. Tệp lớn có thể vượt giới hạn bộ nhớ iPhone. Hãy giữ bản gốc trong Ảnh/Tệp và thêm từng đợt nếu cần.</div>
   </section>
 
 
@@ -185,7 +189,7 @@ Từ đây kết nối thuận tiện đến các trục đường lớn."></tex
   </section>
 
   <section class="card hidden" id="result">
-    <div class="step"><span class="num">4</span><div><h2>Phương án dựng đề xuất</h2><div class="small">Anh có thể bỏ chọn hoặc đổi nhóm cảnh trước khi duyệt.</div></div></div>
+    <div class="step"><span class="num">4</span><div><h2>Phương án dựng đề xuất</h2><div class="small">Anh có thể đổi thời lượng, thứ tự, tên cảnh, mô tả và gán tư liệu thủ công trước khi duyệt.</div></div></div>
     <div id="summary" class="notice"></div>
     <h3 style="margin-top:16px">Timeline dự kiến</h3>
     <div id="timeline"></div>
@@ -201,10 +205,10 @@ Từ đây kết nối thuận tiện đến các trục đường lớn."></tex
       <button class="btn primary" id="approve">Duyệt phương án này</button>
     </div>
     <div id="approveStatus" class="status"></div>
-    <div class="notice warn">Đây là storyboard thử nghiệm dựa trên thông tin và thời lượng video. Bản Bản thử nghiệm hiện chưa có AI thị giác thực sự để chấm điểm cảnh đẹp, chưa tự cắt ghép hay xuất MP4. Những phần đó cần tích hợp và kiểm thử tiếp.</div>
+    <div class="notice warn">V1.9 tạo timeline nhiều cảnh, cho phép anh đổi thứ tự, thời lượng, tên/mô tả và gán video/ảnh thủ công. Ứng dụng chưa tự hiểu nội dung hình ảnh, chưa tự cắt ghép hay xuất MP4; việc gán tư liệu hiện do anh chọn.</div>
   </section>
 
-  <div class="footer">HUY NHÀ PHỐ AI STUDIO · V1.8.6 · Sao lưu an toàn và điều khiển sáng tạo</div>
+  <div class="footer">HUY NHÀ PHỐ AI STUDIO · V1.9 · Sao lưu an toàn và điều khiển sáng tạo</div>
 </div>
 <script>
 const $=id=>document.getElementById(id);
@@ -233,7 +237,7 @@ function dbDelete(id){return new Promise((resolve,reject)=>{const t=db.transacti
 function getFormData(){const data={};fieldIds.forEach(id=>data[id]=$(id)?.value??"");return data;}
 function projectTitle(p){return (p.form?.project||"Dự án chưa đặt tên").trim()||"Dự án chưa đặt tên";}
 function setStatus(msg){$("saveStatus").textContent=msg;}
-function selectedSceneData(){return scenes.map(s=>({name:s.name,desc:s.desc,dur:s.dur,checked:s.checked}));}
+function selectedSceneData(){return scenes.map(s=>({name:s.name,desc:s.desc,dur:s.dur,checked:s.checked,assetName:s.assetName||""}));}
 let saveInFlight=null;
 async function saveCurrent(showMessage=false){
  if(saveInFlight) return saveInFlight;
@@ -308,7 +312,7 @@ async function loadProject(id){
  if(p.generated&&files.length){
    $("generate").click();
    if(Array.isArray(p.scenes)&&scenes.length){
-     p.scenes.forEach(saved=>{const idx=scenes.findIndex(s=>s.name===saved.name);if(idx>=0){scenes[idx].dur=saved.dur;scenes[idx].checked=saved.checked;}});
+     p.scenes.forEach(saved=>{const idx=scenes.findIndex(s=>s.name===saved.name);if(idx>=0){scenes[idx].dur=saved.dur;scenes[idx].checked=saved.checked;scenes[idx].assetName=saved.assetName||"";}});
      const rows=Array.from($("timeline").querySelectorAll(".scene"));
      rows.forEach((row,i)=>{if(scenes[i]){const cb=row.querySelector('input[type="checkbox"]');const sel=row.querySelector("select");if(cb)cb.checked=scenes[i].checked;if(sel)sel.value=String(scenes[i].dur);}});
      rows.forEach((row,i)=>{const cb=row.querySelector('input[type="checkbox"]');if(cb)cb.dispatchEvent(new Event("change"));});
@@ -519,18 +523,33 @@ $('backupFile').addEventListener('change',async e=>{const f=e.target.files?.[0];
 
 function makeScenes(total){
  const defaults=[
- ["Mở đầu gây chú ý","Cảnh mở đầu mạnh nhất; đưa giá và diện tích lên sớm.",0.12],
- ["Vị trí và lối vào","Cảnh đường vào/hẻm và bản đồ khu vực đã xác minh.",0.16],
- ["Tham quan không gian","Phòng khách, bếp, cầu thang, phòng ngủ và WC theo đúng trình tự.",0.42],
- ["Điểm nổi bật và trải nghiệm sống","Ánh sáng, thông thoáng, công năng và chi tiết đáng chú ý.",0.20],
- ["Kết thúc – mời khách xem nhà","Huy xuất hiện hoặc cảnh đẹp nhất kèm lời mời xem thực tế.",0.10]
+ ["Mở đầu – mặt tiền căn nhà","Dùng cảnh mặt tiền rõ, đẹp và ổn định nhất. Có thể đặt giá và diện tích nếu đã xác minh.",0.10],
+ ["Vị trí và đường vào","Dùng cảnh đường/hẻm tiếp cận; chỉ nêu thông tin khu vực đã kiểm chứng.",0.14],
+ ["Phòng khách và không gian chung","Cho người xem hình dung lối đi, độ rộng và cách bố trí sinh hoạt.",0.18],
+ ["Khu bếp và khu vực ăn uống","Thể hiện công năng, tủ bếp và không gian dùng bữa nếu có tư liệu.",0.13],
+ ["Phòng ngủ","Lần lượt giới thiệu phòng ngủ; không tự suy đoán diện tích hoặc công năng.",0.18],
+ ["Nhà vệ sinh và chi tiết tiện ích","Dùng cảnh WC, cầu thang, ban công hoặc chi tiết thực tế có trong tư liệu.",0.12],
+ ["Điểm nổi bật và trải nghiệm sống","Tổng hợp ánh sáng, thông thoáng, bố trí và ưu điểm đã xác minh.",0.08],
+ ["Kết thúc – mời khách xem nhà","Dùng cảnh đẹp phù hợp hoặc Huy xuất hiện cùng lời mời xem thực tế.",0.07]
  ];
- const custom=($("structure")?.value||"").split(/\\n+/).map(x=>x.trim()).filter(Boolean);
- const raw=custom.length?custom.map((name,i)=>[name,"AI chọn cảnh phù hợp với phần nội dung này; chỉ sử dụng thông tin đã xác minh.",1/custom.length]):defaults;
- const durations=raw.map(x=>Math.max(2,Math.floor(total*x[2])));let sum=durations.reduce((a,b)=>a+b,0);
+ const rawText=($("structure")?.value||"").replace(/\\r/g,"").replace(/\\n/g,"\n");
+ const custom=rawText.split(/\n+/).map(x=>x.trim()).filter(Boolean);
+ const raw=custom.length>1?custom.map((name,i)=>[name,"Gợi ý cảnh: "+sceneHint(name),1/custom.length]):defaults;
+ const durations=raw.map(x=>Math.max(3,Math.floor(total*x[2])));let sum=durations.reduce((a,b)=>a+b,0);
  while(sum<total){durations[durations.length-1]++;sum++;}
- while(sum>total){let idx=durations.findIndex(d=>d>2);if(idx<0)break;durations[idx]--;sum--;}
- return raw.map((x,i)=>({name:x[0],desc:x[1],dur:durations[i],checked:true}));
+ while(sum>total){let idx=durations.findIndex(d=>d>3);if(idx<0)break;durations[idx]--;sum--;}
+ return raw.map((x,i)=>({name:x[0],desc:x[1],dur:durations[i],checked:true,assetName:""}));
+}
+function sceneHint(name){
+ const n=name.toLowerCase();
+ if(/mặt tiền|mở đầu|ngoại thất/.test(n))return "Ưu tiên video mặt tiền hoặc ảnh tổng thể căn nhà.";
+ if(/vị trí|đường vào|hẻm|kết nối/.test(n))return "Ưu tiên video lối vào, hẻm hoặc đường kết nối; bản đồ chỉ dùng khi đã xác minh.";
+ if(/khách|không gian chung/.test(n))return "Ưu tiên cảnh phòng khách và lối lưu thông bên trong.";
+ if(/bếp|ăn uống/.test(n))return "Ưu tiên cảnh bếp và khu vực ăn uống.";
+ if(/ngủ/.test(n))return "Ưu tiên cảnh từng phòng ngủ, giữ đúng trình tự tư liệu.";
+ if(/wc|vệ sinh|tiện ích|chi tiết/.test(n))return "Ưu tiên cảnh nhà vệ sinh và các chi tiết tiện ích thực tế.";
+ if(/kết thúc|mời khách/.test(n))return "Dùng cảnh đẹp phù hợp hoặc cảnh Huy mời khách đến xem.";
+ return "Anh chọn tư liệu phù hợp sau khi xem nội dung thực tế.";
 }
 function durationTarget(){const n=Math.round(Number($("duration").value)||120);return Math.max(15,Math.min(600,n));}
 function chooseStyle(){const requested=$("style").value,details=($("details").value+" "+$("project").value).toLowerCase();if(requested!=="auto")return requested;if(/nội thất|sang trọng|cao cấp|hiện đại|đẹp/.test(details))return "cinematic";if(/hẻm|đường|aeon|chợ|trường|vị trí|kết nối/.test(details))return "location";if(/cũ|sửa|cải tạo|tiềm năng/.test(details))return "potential";return "warm";}
@@ -541,18 +560,38 @@ $("generate").addEventListener("click",()=>{
  const style=chooseStyle(),total=durationTarget();scenes=makeScenes(total);
  const mapNames={auto:"AI tự kết hợp 2D, 3D và vệ tinh tùy căn nhà","2d":"Bản đồ 2D","3d":"Bản đồ 3D",satellite:"Bản đồ vệ tinh",hybrid:"Kết hợp 2D + 3D + vệ tinh"};
  $("summary").textContent="Đề xuất phong cách: "+styleNames[style]+". Thời lượng mục tiêu: "+total+" giây. Ưu tiên: "+$("priority").value+". Nhịp dựng: "+$("pacing").value+". Hiệu ứng: "+$("effects").value+". Đồ họa: "+$("graphics").value+". Bố cục: "+$("structure").value.replace(/\\n/g," → ")+". Bản đồ: "+(mapNames[$("mapStyle").value]||mapNames.auto)+". Đây mới là phương án storyboard sơ bộ, chưa phải video đã dựng.";
- $("timeline").innerHTML="";const sceneUIs=[];
- scenes.forEach(s=>{
-  if(s.name==="Vị trí – kết nối"){const mn={"auto":"AI tự kết hợp 2D, 3D và vệ tinh tùy căn nhà","2d":"Bản đồ 2D – đường kết nối và tuyến di chuyển","3d":"Bản đồ 3D – không gian đô thị","satellite":"Bản đồ vệ tinh – hiệu ứng flycam","hybrid":"Kết hợp 2D + 3D + vệ tinh"};s.desc=mn[$("mapStyle").value]+". Chỉ dùng dữ liệu khu vực/tiện ích đã xác minh; không ghim số nhà.";}
-  const row=document.createElement("div");row.className="scene";const check=document.createElement("input");check.type="checkbox";check.checked=s.checked;
-  const body=document.createElement("div");const title=document.createElement("b");title.textContent=s.name;const desc=document.createElement("p");desc.textContent=s.desc;
-  const select=document.createElement("select");[...new Set([4,5,6,7,8,9,10,12,15,18,20,s.dur])].sort((a,b)=>a-b).forEach(n=>{const o=document.createElement("option");o.value=n;o.textContent=n+" giây";if(n===s.dur)o.selected=true;select.append(o);});
-  body.append(title,desc,select);const time=document.createElement("div");time.className="time";sceneUIs.push({scene:s,check,time,select});
-  check.addEventListener("change",()=>{s.checked=check.checked;recalculateSceneTimes();scheduleSave();});
-  select.addEventListener("change",()=>{s.dur=Number(select.value);recalculateSceneTimes();scheduleSave();});
-  row.append(check,body,time);$("timeline").append(row);
- });
- function recalculateSceneTimes(){let cursor=0;sceneUIs.forEach(({scene,check,time})=>{scene.checked=check.checked;if(!scene.checked){time.textContent="Bỏ qua";return;}scene.start=cursor;time.textContent=fmt(cursor)+" → "+fmt(cursor+scene.dur)+" ("+scene.dur+"s)";cursor+=scene.dur;});$("summary").textContent=$("summary").textContent.replace(/Thời lượng timeline: [0-9]+ giây\./,"").trim()+" Thời lượng timeline: "+cursor+" giây.";}
+ function renderTimeline(){
+  $("timeline").innerHTML="";const sceneUIs=[];
+  const media=[...files,...mediaAssets].filter(f=>(f.type||"").startsWith("video/")||(f.type||"").startsWith("image/")||/\.(mp4|mov|m4v|webm|jpg|jpeg|png|heic)$/i.test(f.name));
+  scenes.forEach((s,index)=>{
+   const row=document.createElement("div");row.className="scene";
+   const check=document.createElement("input");check.type="checkbox";check.checked=s.checked;
+   const body=document.createElement("div");
+   const title=document.createElement("b");title.textContent=(index+1)+". "+s.name;
+   const desc=document.createElement("p");desc.textContent=s.desc;
+   const duration=document.createElement("select");
+   [...new Set([3,4,5,6,7,8,9,10,12,15,18,20,25,30,s.dur])].sort((a,b)=>a-b).forEach(n=>{const o=document.createElement("option");o.value=n;o.textContent=n+" giây";if(n===s.dur)o.selected=true;duration.append(o);});
+   const assetLabel=document.createElement("div");assetLabel.className="scene-asset";assetLabel.textContent="Tư liệu gán thủ công (chưa có AI tự nhận diện)";
+   const asset=document.createElement("select");const empty=document.createElement("option");empty.value="";empty.textContent="Chưa chọn tư liệu";asset.append(empty);
+   media.forEach(f=>{const o=document.createElement("option");o.value=f.name;o.textContent=f.name;if(f.name===s.assetName)o.selected=true;asset.append(o);});
+   asset.value=s.assetName||"";
+   asset.addEventListener("change",()=>{s.assetName=asset.value;scheduleSave();});
+   const tools=document.createElement("div");tools.className="scene-tools";
+   [["↑ Lên",()=>{if(index>0){[scenes[index-1],scenes[index]]=[scenes[index],scenes[index-1]];renderTimeline();scheduleSave();}}],
+    ["↓ Xuống",()=>{if(index<scenes.length-1){[scenes[index+1],scenes[index]]=[scenes[index],scenes[index+1]];renderTimeline();scheduleSave();}}],
+    ["Sửa tên",()=>{const v=prompt("Tên cảnh:",s.name);if(v&&v.trim()){s.name=v.trim();renderTimeline();scheduleSave();}}],
+    ["Sửa mô tả",()=>{const v=prompt("Mô tả cảnh:",s.desc);if(v!==null){s.desc=v.trim();renderTimeline();scheduleSave();}}]
+   ].forEach(([label,fn])=>{const b=document.createElement("button");b.type="button";b.textContent=label;b.addEventListener("click",fn);tools.append(b);});
+   body.append(title,desc,duration,assetLabel,asset,tools);
+   const time=document.createElement("div");time.className="time";sceneUIs.push({scene:s,check,time,duration});
+   check.addEventListener("change",()=>{s.checked=check.checked;recalculateSceneTimes();scheduleSave();});
+   duration.addEventListener("change",()=>{s.dur=Number(duration.value);recalculateSceneTimes();scheduleSave();});
+   row.append(check,body,time);$("timeline").append(row);
+  });
+  function recalculateSceneTimes(){let cursor=0;sceneUIs.forEach(({scene,check,time})=>{scene.checked=check.checked;if(!scene.checked){time.textContent="Bỏ qua";return;}scene.start=cursor;time.textContent=fmt(cursor)+" → "+fmt(cursor+scene.dur)+" ("+scene.dur+"s)";cursor+=scene.dur;});$("summary").textContent=$("summary").textContent.replace(/Thời lượng timeline: [0-9]+ giây\./,"").trim()+" Thời lượng timeline: "+cursor+" giây.";}
+  recalculateSceneTimes();
+ }
+ renderTimeline();
  recalculateSceneTimes();$("result").classList.remove("hidden");$("generateStatus").textContent="Đã tạo phương án dựng thử.";scheduleSave();
 });
 function scriptText(){const selected=scenes.filter(s=>s.checked);return "HUY NHÀ PHỐ – PHƯƠNG ÁN DỰNG\nDự án: "+$("project").value+"\nGiá: "+$("price").value+"\nDiện tích: "+$("area").value+"\nPhong cách: "+styleNames[chooseStyle()]+"\nThời lượng: "+$("duration").value+"\n\n"+selected.map((s,i)=>(i+1)+". "+s.name+" – "+s.dur+" giây\n"+s.desc).join("\n\n")+"\n\nLời kết: "+$("voice").value+"\n\nLưu ý: Không hiển thị số nhà hoặc vị trí chính xác.";}
